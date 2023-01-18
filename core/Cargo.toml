@@ -1,0 +1,64 @@
+[package]
+name = "posol-core"
+version = "0.1.0"
+authors = ["Lone G"]
+readme = "README.md"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+blake2 = "0.9"
+ark-std = { version = "0.3", default-features = false }
+ark-ec = "0.3"
+ark-ff = "0.3"
+ark-poly = "0.3"
+ark-poly-commit = { version = "0.3", default-features = false }
+ark-serialize = { version = "0.3", features = ["derive"] }
+derivative = { version = "2.2.0", default-features = false, features = ["use_core"] }
+indexmap = { version = "1.8.1", default-features = false }
+itertools = { version = "0.10.1", default-features = false }
+merlin = { version = "3.0", default-features = false }
+num-traits = "0.2.14"
+rand_core = { version = "0.6", default-features = false, features = ["getrandom"] }
+rayon = { version = "1.5.3", optional = true }
+
+[dev-dependencies]
+ark-bn254 = "0.3"
+proptest = "1.0.0"
+
+[features]
+# Default Features
+default = [
+    "std",
+    "asm",
+    "itertools/default",
+    "parallel",
+]
+
+# Raw Assembly
+asm = ["ark-ff/asm"]
+
+# Parallelism Features
+parallel = [
+    "rayon",
+    "ark-std/parallel",
+    "ark-ec/parallel",
+    "ark-ff/parallel",
+    "ark-poly/parallel",
+    "ark-poly-commit/parallel",
+]
+
+# Enable Standard Library
+std = [
+    "anyhow/std",
+    "ark-std/std",
+    "ark-ec/std",
+    "ark-ff/std",
+    "ark-poly/std",
+    "ark-poly-commit/std",
+    "ark-serialize/std",
+]
+
+print-trace = ["ark-std/print-trace"]
