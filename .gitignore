@@ -1,4 +1,12 @@
 .vscode
 .idea
+
+contracts/.env
+contracts/cache
+contracts/artifacts
+contracts/typechain
+contracts/node_modules
+contracts/package-lock.json
+
 core/target
 *Cargo.lock
