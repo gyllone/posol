@@ -119,7 +119,7 @@ where
 
         scalars.push(
             ln_eval * deltas[6]
-            - self.evaluations.z_next * (gamma + self.evaluations.h1)  * deltas[0]
+            - self.evaluations.z_next * (gamma + self.evaluations.h1) * deltas[0]
             - (self.evaluations.h2_next - self.evaluations.h2 - F::one()) * (ln_eval - F::one()) * deltas[3]
         );
         commitments.push(self.h2_commit.clone());

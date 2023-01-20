@@ -29,71 +29,89 @@ where
     D: EvaluationDomain<F>,
 {
     let n = domain.size();
+    #[cfg(feature = "blinding")]
     // Size of quotient poly is 2n+6 <= 4n => n >= 3
     assert!(n >= 3);
 
-    let domain_4n = D::new(4 * n)
+    #[cfg(not(feature = "blinding"))]
+    let multiplier = 2;
+    #[cfg(feature = "blinding")]
+    let multiplier = 4;
+
+    let extended_domain = D::new(multiplier * n)
         .ok_or(anyhow!(
             "log size of group: {}, 2-adicity: {}",
-            (4 * n).trailing_zeros(),
+            (multiplier * n).trailing_zeros(),
             <F::FftParams as ark_ff::FftParameters>::TWO_ADICITY,
         ))?;
 
-    let t_coset = coset_evals_from_poly_ref(&domain_4n, t_poly);
-    let b_coset = coset_evals_from_poly_ref(&domain_4n, b_poly);
+    let t_coset = coset_evals_from_poly_ref(&extended_domain, t_poly);
+    let b_coset = coset_evals_from_poly_ref(&extended_domain, b_poly);
 
-    let mut s_coset = coset_evals_from_poly_ref(&domain_4n, s_poly);
+    let mut s_coset = coset_evals_from_poly_ref(&extended_domain, s_poly);
     s_coset.push(s_coset[0]);
     s_coset.push(s_coset[1]);
-    s_coset.push(s_coset[2]);
-    s_coset.push(s_coset[3]);
+    #[cfg(feature = "blinding")]
+    {
+        s_coset.push(s_coset[2]);
+        s_coset.push(s_coset[3]);
+    }
 
-    let mut h1_coset = coset_evals_from_poly_ref(&domain_4n, h1_poly);
+    let mut h1_coset = coset_evals_from_poly_ref(&extended_domain, h1_poly);
     h1_coset.push(h1_coset[0]);
     h1_coset.push(h1_coset[1]);
-    h1_coset.push(h1_coset[2]);
-    h1_coset.push(h1_coset[3]);
+    #[cfg(feature = "blinding")]
+    {
+        h1_coset.push(h1_coset[2]);
+        h1_coset.push(h1_coset[3]);
+    }
 
-    let mut h2_coset = coset_evals_from_poly_ref(&domain_4n, h2_poly);
+    let mut h2_coset = coset_evals_from_poly_ref(&extended_domain, h2_poly);
     h2_coset.push(h2_coset[0]);
     h2_coset.push(h2_coset[1]);
-    h2_coset.push(h2_coset[2]);
-    h2_coset.push(h2_coset[3]);
+    #[cfg(feature = "blinding")]
+    {
+        h2_coset.push(h2_coset[2]);
+        h2_coset.push(h2_coset[3]);
+    }
 
-    let mut z_coset = coset_evals_from_poly_ref(&domain_4n, z_poly);
+    let mut z_coset = coset_evals_from_poly_ref(&extended_domain, z_poly);
     z_coset.push(z_coset[0]);
     z_coset.push(z_coset[1]);
-    z_coset.push(z_coset[2]);
-    z_coset.push(z_coset[3]);
+    #[cfg(feature = "blinding")]
+    {
+        z_coset.push(z_coset[2]);
+        z_coset.push(z_coset[3]);
+    }
 
-    // Compute 4n evaluations for x^n - 1
+    // Compute extended evaluations for x^n - 1
     let vh_poly: DensePolynomial<_> = domain.vanishing_polynomial().into();
-    let vh_coset = coset_evals_from_poly(&domain_4n, vh_poly);
+    let vh_coset = coset_evals_from_poly(&extended_domain, vh_poly);
 
-    // compute 4n evaluations for L0(x)
+    // compute extended evaluations for L0(x)
     let mut l0_evals = vec![F::zero(); n];
     l0_evals[0] = F::one();
     let l0_poly = poly_from_evals(domain, l0_evals);
-    let l0_coset = coset_evals_from_poly(&domain_4n, l0_poly);
+    let l0_coset = coset_evals_from_poly(&extended_domain, l0_poly);
 
-    // compute 4n evaluations for L{n-1}(x)
+    // compute extended evaluations for L{n-1}(x)
     let mut ln_evals = vec![F::zero(); n];
     ln_evals[n - 1] = F::one();
     let ln_poly = poly_from_evals(domain, ln_evals);
-    let ln_coset = coset_evals_from_poly(&domain_4n, ln_poly);
+    let ln_coset = coset_evals_from_poly(&extended_domain, ln_poly);
 
     #[cfg(not(feature = "parallel"))]
     let quotient_iter = itertools::izip!(
         t_coset,
         b_coset,
         s_coset.iter(),
-        s_coset.iter().skip(4),
+        s_coset.iter().skip(multiplier),
         h1_coset.iter(),
-        h1_coset.iter().skip(4),
+        h1_coset.iter().skip(multiplier),
         h2_coset.iter(),
-        h2_coset.iter().skip(4),
+        h2_coset.iter().skip(multiplier),
         z_coset.iter(),
-        z_coset.iter().skip(4),
+        z_coset.iter().skip(multiplier),
         vh_coset,
         l0_coset,
         ln_coset,
@@ -102,13 +120,13 @@ where
         t_coset,
         b_coset,
         s_coset.par_iter(),
-        s_coset.par_iter().skip(4),
+        s_coset.par_iter().skip(multiplier),
         h1_coset.par_iter(),
-        h1_coset.par_iter().skip(4),
+        h1_coset.par_iter().skip(multiplier),
         h2_coset.par_iter(),
-        h2_coset.par_iter().skip(4),
+        h2_coset.par_iter().skip(multiplier),
         z_coset.par_iter(),
-        z_coset.par_iter().skip(4),
+        z_coset.par_iter().skip(multiplier),
         vh_coset,
         l0_coset,
         ln_coset,
@@ -136,8 +154,11 @@ where
         })
         .collect();
 
-    let q_poly = poly_from_coset_evals(&domain_4n, q_evals);
+    let q_poly = poly_from_coset_evals(&extended_domain, q_evals);
     // Sanity check
+    #[cfg(not(feature = "blinding"))]
+    assert!(q_poly.degree() <= n);
+    #[cfg(feature = "blinding")]
     assert!(q_poly.degree() <= 2 * n + 6);
 
     Ok(q_poly)
