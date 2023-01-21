@@ -13,6 +13,8 @@ use ark_poly::{EvaluationDomain, univariate::DensePolynomial, UVPolynomial};
 use ark_poly_commit::{PCRandomness, LabeledPolynomial};
 use itertools::Itertools;
 use rand_core::{CryptoRng, RngCore};
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 
 use crate::{
     util::{EvaluationDomainExt, poly_from_evals_ref, poly_from_evals},
@@ -66,7 +68,7 @@ pub fn prove<F, D, PC, T, R>(
     labeled_t_poly: &LabeledPolynomial<F, DensePolynomial<F>>,
     t_commit: &PC::Commitment,
     balances: &[u64],
-    _rng: &mut R,
+    rng: &mut R,
 ) -> Result<(F, Proof<F, D, PC>, LabeledPolynomial<F, DensePolynomial<F>>)>
 where
     F: FftField,
@@ -106,28 +108,32 @@ where
     transcript.append_scalar("m", &m);
 
     // Compute polynomials B(X).
-    let mut _b_poly = poly_from_evals_ref(&domain, &b_evals);
-    #[cfg(feature = "blinding")]
-    add_blinders_to_poly(_rng, 2, &mut _b_poly);
-    let labeled_b_poly = label_polynomial!(_b_poly);
+    let mut b_poly = poly_from_evals_ref(&domain, &b_evals);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 2, &mut b_poly);
+    }
+    let labeled_b_poly = label_polynomial!(b_poly);
 
     // Compute aux polynomial S(X).
-    let mut _s_poly = poly_from_evals(&domain, s_evals);
-    #[cfg(feature = "blinding")]
-    add_blinders_to_poly(_rng, 3, &mut _s_poly);
-    let labeled_s_poly = label_polynomial!(_s_poly);
+    let mut s_poly = poly_from_evals(&domain, s_evals);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut s_poly);
+    }
+    let labeled_s_poly = label_polynomial!(s_poly);
 
     // Compute polynomials h1(X) and h2(X).
     let (h1_evals, h2_evals) = generate_h_evals(&b_evals);
-    let mut _h1_poly = poly_from_evals_ref(&domain, &h1_evals);
-    #[cfg(feature = "blinding")]
-    add_blinders_to_poly(_rng, 3, &mut _h1_poly);
-    let labeled_h1_poly = label_polynomial!(_h1_poly);
+    let mut h1_poly = poly_from_evals_ref(&domain, &h1_evals);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut h1_poly);
+    }
+    let labeled_h1_poly = label_polynomial!(h1_poly);
 
-    let mut _h2_poly = poly_from_evals_ref(&domain, &h2_evals);
-    #[cfg(feature = "blinding")]
-    add_blinders_to_poly(_rng, 3, &mut _h2_poly);
-    let labeled_h2_poly = label_polynomial!(_h2_poly);
+    let mut h2_poly = poly_from_evals_ref(&domain, &h2_evals);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut h2_poly);
+    }
+    let labeled_h2_poly = label_polynomial!(h2_poly);
 
     // Commit to B(X), S(X), h1(X), h2(X)
     let (labeled_bsh_commits, _) =
@@ -155,10 +161,11 @@ where
     drop(b_evals);
     drop(h1_evals);
     drop(h2_evals);
-    let mut _z_poly = poly_from_evals(&domain, z_evals);
-    #[cfg(feature = "blinding")]
-    add_blinders_to_poly(_rng, 3, &mut _z_poly);
-    let labeled_z_poly = label_polynomial!(_z_poly);
+    let mut z_poly = poly_from_evals(&domain, z_evals);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut z_poly);
+    }
+    let labeled_z_poly = label_polynomial!(z_poly);
 
     // Commit to z(X).
     let (labeled_z_commit, _) =
@@ -185,19 +192,17 @@ where
     )?;
     
     // Split quotient polynomials.
-    let mut _q1_poly =
-        DensePolynomial::from_coefficients_slice(&q_poly[..(n + 3)]);
-    let mut _q2_poly =
-        DensePolynomial::from_coefficients_slice(&q_poly[(n + 3)..]);
-    #[cfg(feature = "blinding")]
-    {
+    let split = if cfg!(blinding) { n + 3 } else { n };
+    let mut q1_poly = DensePolynomial::from_coefficients_slice(&q_poly[..split]);
+    let mut q2_poly = DensePolynomial::from_coefficients_slice(&q_poly[split..]);
+    if cfg!(blinding) {
         // Add blinding factors for quotient polynomials.
-        let e0 = F::rand(_rng);
-        _q1_poly.coeffs.push(e0);
-        _q2_poly.coeffs[0] -= e0;
+        let e0 = F::rand(rng);
+        q1_poly.coeffs.push(e0);
+        q2_poly.coeffs[0] -= e0;
     }
-    let labeled_q1_poly = label_polynomial!(_q1_poly);
-    let labeled_q2_poly = label_polynomial!(_q2_poly);
+    let labeled_q1_poly = label_polynomial!(q1_poly);
+    let labeled_q2_poly = label_polynomial!(q2_poly);
     
     // Commit to quotient polynomials.
     let (labeled_q_commits, _) =
@@ -401,15 +406,11 @@ where
 }
 
 /// Add blinding factors to polynomial.
-#[cfg(feature = "blinding")]
 fn add_blinders_to_poly<F, R>(rng: &mut R, k: usize, poly: &mut DensePolynomial<F>)
 where
     F: Field,
     R: RngCore + CryptoRng,
 {
-    #[cfg(feature = "parallel")]
-    use rayon::prelude::*;
-
     let blinders = (0..k).into_iter().map(|_| F::rand(rng)).collect_vec();
     poly.coeffs.extend_from_slice(&blinders);
     
@@ -494,22 +495,18 @@ fn generate_z_evals<F: Field>(
 #[cfg(test)]
 mod test {
     use ark_ff::UniformRand;
-    use ark_poly::GeneralEvaluationDomain;
+    use ark_poly::{GeneralEvaluationDomain, EvaluationDomain, Polynomial};
     use ark_poly_commit::PolynomialCommitment;
     use ark_std::{test_rng, rand::Rng};
     use ark_bn254::{Bn254, Fr};
     use itertools::Itertools;
     use num_traits::{Zero, One};
     
-    use crate::commitment::KZG10;
+    use crate::{commitment::KZG10, util::poly_from_evals_ref};
     use super::{*, transcript::MerlinTranscript};
 
-    #[cfg(feature = "blinding")]
     #[test]
     fn test_add_blinders_to_poly() {
-        use ark_poly::{EvaluationDomain, Polynomial};
-        use crate::util::poly_from_evals_ref;
-
         let rng = &mut test_rng();
         // 8 degree poly
         let domain = GeneralEvaluationDomain::new(8).unwrap();
@@ -613,10 +610,11 @@ mod test {
 
         let n = 16;
         // setup
-        let pp = KZG10::<Bn254>::setup(n + 3, None, rng).unwrap();
+        let max_degree = if cfg!(blinding) { n + 3 } else { n };
+        let pp = KZG10::<Bn254>::setup(max_degree, None, rng).unwrap();
         let (ck, cvk) = KZG10::<Bn254>::trim(
             &pp,
-            n + 3,
+            max_degree,
             0,
             None,
         ).unwrap();

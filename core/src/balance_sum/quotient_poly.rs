@@ -29,15 +29,12 @@ where
     D: EvaluationDomain<F>,
 {
     let n = domain.size();
-    #[cfg(feature = "blinding")]
-    // Size of quotient poly is 2n+6 <= 4n => n >= 3
-    assert!(n >= 3);
+    if cfg!(blinding) {
+        // Size of quotient poly is 2n+6 <= 4n => n >= 3
+        assert!(n >= 3);
+    }
 
-    #[cfg(not(feature = "blinding"))]
-    let multiplier = 2;
-    #[cfg(feature = "blinding")]
-    let multiplier = 4;
-
+    let multiplier = if cfg!(blinding) { 4 } else { 2 };
     let extended_domain = D::new(multiplier * n)
         .ok_or(anyhow!(
             "log size of group: {}, 2-adicity: {}",
@@ -51,8 +48,7 @@ where
     let mut s_coset = coset_evals_from_poly_ref(&extended_domain, s_poly);
     s_coset.push(s_coset[0]);
     s_coset.push(s_coset[1]);
-    #[cfg(feature = "blinding")]
-    {
+    if cfg!(blinding) {
         s_coset.push(s_coset[2]);
         s_coset.push(s_coset[3]);
     }
@@ -60,8 +56,7 @@ where
     let mut h1_coset = coset_evals_from_poly_ref(&extended_domain, h1_poly);
     h1_coset.push(h1_coset[0]);
     h1_coset.push(h1_coset[1]);
-    #[cfg(feature = "blinding")]
-    {
+    if cfg!(blinding) {
         h1_coset.push(h1_coset[2]);
         h1_coset.push(h1_coset[3]);
     }
@@ -69,8 +64,7 @@ where
     let mut h2_coset = coset_evals_from_poly_ref(&extended_domain, h2_poly);
     h2_coset.push(h2_coset[0]);
     h2_coset.push(h2_coset[1]);
-    #[cfg(feature = "blinding")]
-    {
+    if cfg!(blinding) {
         h2_coset.push(h2_coset[2]);
         h2_coset.push(h2_coset[3]);
     }
@@ -78,8 +72,7 @@ where
     let mut z_coset = coset_evals_from_poly_ref(&extended_domain, z_poly);
     z_coset.push(z_coset[0]);
     z_coset.push(z_coset[1]);
-    #[cfg(feature = "blinding")]
-    {
+    if cfg!(blinding) {
         z_coset.push(z_coset[2]);
         z_coset.push(z_coset[3]);
     }
@@ -116,6 +109,7 @@ where
         l0_coset,
         ln_coset,
     );
+    #[cfg(feature = "parallel")]
     let quotient_iter = crate::par_izip!(
         t_coset,
         b_coset,
@@ -156,10 +150,11 @@ where
 
     let q_poly = poly_from_coset_evals(&extended_domain, q_evals);
     // Sanity check
-    #[cfg(not(feature = "blinding"))]
-    assert!(q_poly.degree() <= n);
-    #[cfg(feature = "blinding")]
-    assert!(q_poly.degree() <= 2 * n + 6);
+    if cfg!(blinding) {
+        assert!(q_poly.degree() <= 2 * n + 6);
+    } else {
+        assert!(q_poly.degree() <= 2 * n);
+    }
 
     Ok(q_poly)
 }

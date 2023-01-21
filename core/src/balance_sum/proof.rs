@@ -127,7 +127,11 @@ where
         scalars.push(-zh_eval);
         commitments.push(self.q1_commit.clone());
 
-        scalars.push(-zh_eval * (zh_eval + F::one()) * z.square() * z);
+        if cfg!(blinding) {
+            scalars.push(-zh_eval * (zh_eval + F::one()) * z.square() * z);
+        } else {
+            scalars.push(-zh_eval * (zh_eval + F::one()));
+        }
         commitments.push(self.q2_commit.clone());
 
         PC::multi_scalar_mul(&commitments, &scalars)
