@@ -63,4 +63,4 @@ std = [
 
 print-trace = ["ark-std/print-trace"]
 
-blind = []
+blinding = []

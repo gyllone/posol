@@ -119,7 +119,7 @@ where
 
         scalars.push(
             ln_eval * deltas[6]
-            - self.evaluations.z_next * (gamma + self.evaluations.h1)  * deltas[0]
+            - self.evaluations.z_next * (gamma + self.evaluations.h1) * deltas[0]
             - (self.evaluations.h2_next - self.evaluations.h2 - F::one()) * (ln_eval - F::one()) * deltas[3]
         );
         commitments.push(self.h2_commit.clone());
@@ -127,7 +127,11 @@ where
         scalars.push(-zh_eval);
         commitments.push(self.q1_commit.clone());
 
-        scalars.push(-zh_eval * (zh_eval + F::one()) * z.square() * z);
+        if cfg!(blinding) {
+            scalars.push(-zh_eval * (zh_eval + F::one()) * z.square() * z);
+        } else {
+            scalars.push(-zh_eval * (zh_eval + F::one()));
+        }
         commitments.push(self.q2_commit.clone());
 
         PC::multi_scalar_mul(&commitments, &scalars)

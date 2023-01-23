@@ -69,7 +69,11 @@ where
         ))
     );
     r_poly.sub_assign(&(q1_poly * zh_eval));
-    r_poly.sub_assign(&(q2_poly * (zh_eval * (zh_eval + F::one()) * z.square() * z)));
+    if cfg!(blinding) {
+        r_poly.sub_assign(&(q2_poly * (zh_eval * (zh_eval + F::one()) * z.square() * z)));
+    } else {
+        r_poly.sub_assign(&(q2_poly * (zh_eval * (zh_eval + F::one()))));
+    }
 
     let evaluations = Evaluations {
         b: b_eval,

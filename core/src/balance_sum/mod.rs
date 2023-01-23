@@ -7,7 +7,7 @@ pub mod transcript;
 
 use std::collections::HashMap;
 use anyhow::{anyhow, Result};
-use ark_std::{cfg_iter_mut, start_timer, end_timer};
+use ark_std::{start_timer, end_timer};
 use ark_ff::{FftField, Field};
 use ark_poly::{EvaluationDomain, univariate::DensePolynomial, UVPolynomial};
 use ark_poly_commit::{PCRandomness, LabeledPolynomial};
@@ -109,22 +109,30 @@ where
 
     // Compute polynomials B(X).
     let mut b_poly = poly_from_evals_ref(&domain, &b_evals);
-    add_blinders_to_poly(rng, 2, &mut b_poly);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 2, &mut b_poly);
+    }
     let labeled_b_poly = label_polynomial!(b_poly);
 
     // Compute aux polynomial S(X).
     let mut s_poly = poly_from_evals(&domain, s_evals);
-    add_blinders_to_poly(rng, 3, &mut s_poly);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut s_poly);
+    }
     let labeled_s_poly = label_polynomial!(s_poly);
 
     // Compute polynomials h1(X) and h2(X).
     let (h1_evals, h2_evals) = generate_h_evals(&b_evals);
     let mut h1_poly = poly_from_evals_ref(&domain, &h1_evals);
-    add_blinders_to_poly(rng, 3, &mut h1_poly);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut h1_poly);
+    }
     let labeled_h1_poly = label_polynomial!(h1_poly);
 
     let mut h2_poly = poly_from_evals_ref(&domain, &h2_evals);
-    add_blinders_to_poly(rng, 3, &mut h2_poly);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut h2_poly);
+    }
     let labeled_h2_poly = label_polynomial!(h2_poly);
 
     // Commit to B(X), S(X), h1(X), h2(X)
@@ -154,7 +162,9 @@ where
     drop(h1_evals);
     drop(h2_evals);
     let mut z_poly = poly_from_evals(&domain, z_evals);
-    add_blinders_to_poly(rng, 3, &mut z_poly);
+    if cfg!(blinding) {
+        add_blinders_to_poly(rng, 3, &mut z_poly);
+    }
     let labeled_z_poly = label_polynomial!(z_poly);
 
     // Commit to z(X).
@@ -182,14 +192,15 @@ where
     )?;
     
     // Split quotient polynomials.
-    let mut q1_poly =
-        DensePolynomial::from_coefficients_slice(&q_poly[..(n + 3)]);
-    let mut q2_poly =
-        DensePolynomial::from_coefficients_slice(&q_poly[(n + 3)..]);
-    // Add blinding factors for quotient polynomials.
-    let e0 = F::rand(rng);
-    q1_poly.coeffs.push(e0);
-    q2_poly.coeffs[0] -= e0;
+    let split = if cfg!(blinding) { n + 3 } else { n };
+    let mut q1_poly = DensePolynomial::from_coefficients_slice(&q_poly[..split]);
+    let mut q2_poly = DensePolynomial::from_coefficients_slice(&q_poly[split..]);
+    if cfg!(blinding) {
+        // Add blinding factors for quotient polynomials.
+        let e0 = F::rand(rng);
+        q1_poly.coeffs.push(e0);
+        q2_poly.coeffs[0] -= e0;
+    }
     let labeled_q1_poly = label_polynomial!(q1_poly);
     let labeled_q2_poly = label_polynomial!(q2_poly);
     
@@ -403,7 +414,7 @@ where
     let blinders = (0..k).into_iter().map(|_| F::rand(rng)).collect_vec();
     poly.coeffs.extend_from_slice(&blinders);
     
-    cfg_iter_mut!(poly.coeffs)
+    ark_std::cfg_iter_mut!(poly.coeffs)
         .zip(blinders)
         .for_each(|(coeff, blinder)| coeff.sub_assign(blinder));
 }
@@ -599,10 +610,11 @@ mod test {
 
         let n = 16;
         // setup
-        let pp = KZG10::<Bn254>::setup(n + 3, None, rng).unwrap();
+        let max_degree = if cfg!(blinding) { n + 3 } else { n };
+        let pp = KZG10::<Bn254>::setup(max_degree, None, rng).unwrap();
         let (ck, cvk) = KZG10::<Bn254>::trim(
             &pp,
-            n + 3,
+            max_degree,
             0,
             None,
         ).unwrap();
