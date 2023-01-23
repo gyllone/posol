@@ -11,23 +11,18 @@ library Bn254 {
     }
 
     struct G1Point {
-        uint256 X;
-        uint256 Y;
+        uint256 x;
+        uint256 y;
     }
 
     // Encoding of field elements is: X[0] * z + X[1]
     struct G2Point {
-        uint256[2] X;
-        uint256[2] Y;
+        uint256[2] x;
+        uint256[2] y;
     }
 
-    // function newFr(uint256 fr) internal pure returns (Fr memory) {
-    //     return Fr({value: fr});
-    // }
-
-    function newCheckedFr(uint256 fr) internal pure returns (Fr memory) {
-        require(fr < R_MOD, "Fr is invalid");
-        return Fr({value: fr});
+    function validateFr(Fr memory self) internal pure {
+        require(self.value < R_MOD, "Fr is invalid");
     }
 
     function cloneFr(Fr memory self) internal pure returns (Fr memory) {
@@ -39,12 +34,12 @@ library Bn254 {
     }
 
     function inverse(Fr memory fr) internal view returns (Fr memory result) {
-        require(fr.value != 0);
+        require(fr.value != 0, "Fr is zero");
         powIntoDest(fr, result, R_MOD - 2);
     }
 
     function inverseAssign(Fr memory fr) internal view {
-        require(fr.value != 0);
+        require(fr.value != 0, "Fr is zero");
         powIntoDest(fr, fr, R_MOD - 2);
     }
 
@@ -78,83 +73,76 @@ library Bn254 {
 
     function powIntoDest(Fr memory self, Fr memory dest, uint256 power) internal view {
         uint256[6] memory input = [32, 32, 32, self.value, power, R_MOD];
-        uint256[1] memory result;
         bool success;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            success := staticcall(gas(), 0x05, input, 0xc0, result, 0x20)
+            success := staticcall(gas(), 0x05, input, 0xc0, dest, 0x20)
         }
-        require(success);
-        dest.value = result[0];
+        require(success, "Fr pow operation failed");
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function P1() internal pure returns (G1Point memory) {
         return G1Point(1, 2);
     }
 
-    // function newG1(uint256 x, uint256 y) internal pure returns (G1Point memory) {
-    //     return G1Point(x, y);
-    // }
-
-    function newCheckedG1(uint256 x, uint256 y) internal pure returns (G1Point memory) {
-        if (x == 0 && y == 0) {
-            // point of infinity is (0,0)
-            return G1Point(x, y);
+    function validateG1(G1Point memory self) internal pure {
+        if (self.x == 0 && self.y == 0) {
+            return;
         }
 
         // check encoding
-        require(x < Q_MOD, "x axis isn't valid");
-        require(y < Q_MOD, "y axis isn't valid");
+        require(self.x < Q_MOD, "X axis isn't valid");
+        require(self.y < Q_MOD, "Y axis isn't valid");
         // check on curve
-        uint256 lhs = mulmod(y, y, Q_MOD); // y^2
+        uint256 lhs = mulmod(self.y, self.y, Q_MOD); // y^2
 
-        uint256 rhs = mulmod(x, x, Q_MOD); // x^2
-        rhs = mulmod(rhs, x, Q_MOD); // x^3
+        uint256 rhs = mulmod(self.x, self.x, Q_MOD); // x^2
+        rhs = mulmod(rhs, self.x, Q_MOD); // x^3
         rhs = addmod(rhs, BN254_B_COEFF, Q_MOD); // x^3 + b
-        require(lhs == rhs, "is not on curve");
-
-        return G1Point(x, y);
+        require(lhs == rhs, "G1 point is not on curve");
     }
 
     function copyFromG1(G1Point memory self, G1Point memory other) internal pure {
-        self.X = other.X;
-        self.Y = other.Y;
+        self.x = other.x;
+        self.y = other.y;
     }
 
     function cloneG1(G1Point memory self) internal pure returns (G1Point memory result) {
-        return G1Point(self.X, self.Y);
+        return G1Point(self.x, self.y);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function P2() internal pure returns (G2Point memory) {
         // for some reason ethereum expects to have c1*v + c0 form
         return G2Point(
             [
-                0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2,
-                0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed
+                10857046999023057135944570762232829481370756359578518086990519993285655852781,
+                11559732032986387107991004021392285783925812861821192530917403151452391805634
             ],
             [
-                0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b,
-                0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa
+                8495653923123431417604973247489272438418190587263600148770280649306958101930,
+                4082367875863433681332203403145435568316851327593401208105741076214120093531
             ]
         );
     }
 
     function pointNegate(G1Point memory self) internal pure returns (G1Point memory result) {
         // The prime q in the base field F_q for G1
-        if (self.Y == 0) {
-            require(self.X == 0);
+        if (self.y == 0) {
+            require(self.x == 0, "Invalid G1 point");
         } else {
-            result.X = self.X;
-            result.Y = Q_MOD - self.Y;
+            result.x = self.x;
+            result.y = Q_MOD - self.y;
         }
     }
 
     function pointNegateAssign(G1Point memory self) internal pure {
         // The prime q in the base field F_q for G1
-        if (self.Y == 0) {
-            require(self.X == 0);
+        if (self.y == 0) {
+            require(self.x == 0, "Invalid G1 point");
         } else {
-            self.Y = Q_MOD - self.Y;
+            self.y = Q_MOD - self.y;
         }
     }
 
@@ -172,30 +160,29 @@ library Bn254 {
         G1Point memory p2,
         G1Point memory dest
     ) internal view {
-        if (p2.X == 0 && p2.Y == 0) {
+        if (p2.x == 0 && p2.y == 0) {
             // we add zero, nothing happens
-            dest.X = p1.X;
-            dest.Y = p1.Y;
+            dest.x = p1.x;
+            dest.y = p1.y;
             return;
-        } else if (p1.X == 0 && p1.Y == 0) {
+        } else if (p1.x == 0 && p1.y == 0) {
             // we add into zero, and we add non-zero point
-            dest.X = p2.X;
-            dest.Y = p2.Y;
+            dest.x = p2.x;
+            dest.y = p2.y;
             return;
         } else {
             uint256[4] memory input;
-
-            input[0] = p1.X;
-            input[1] = p1.Y;
-            input[2] = p2.X;
-            input[3] = p2.Y;
+            input[0] = p1.x;
+            input[1] = p1.y;
+            input[2] = p2.x;
+            input[3] = p2.y;
 
             bool success;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                success := staticcall(gas(), 6, input, 0x80, dest, 0x40)
+                success := staticcall(gas(), 0x06, input, 0x80, dest, 0x40)
             }
-            require(success);
+            require(success, "G1 point addition failed");
         }
     }
 
@@ -209,29 +196,29 @@ library Bn254 {
     }
 
     function pointSubIntoDest(G1Point memory p1, G1Point memory p2, G1Point memory dest) internal view {
-        if (p2.X == 0 && p2.Y == 0) {
+        if (p2.x == 0 && p2.y == 0) {
             // we subtracted zero, nothing happens
-            dest.X = p1.X;
-            dest.Y = p1.Y;
+            dest.x = p1.x;
+            dest.y = p1.y;
             return;
-        } else if (p1.X == 0 && p1.Y == 0) {
+        } else if (p1.x == 0 && p1.y == 0) {
             // we subtract from zero, and we subtract non-zero point
-            dest.X = p2.X;
-            dest.Y = Q_MOD - p2.Y;
+            dest.x = p2.x;
+            dest.y = Q_MOD - p2.y;
             return;
         } else {
             uint256[4] memory input;
-            input[0] = p1.X;
-            input[1] = p1.Y;
-            input[2] = p2.X;
-            input[3] = Q_MOD - p2.Y;
+            input[0] = p1.x;
+            input[1] = p1.y;
+            input[2] = p2.x;
+            input[3] = Q_MOD - p2.y;
 
             bool success = false;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                success := staticcall(gas(), 6, input, 0x80, dest, 0x40)
+                success := staticcall(gas(), 0x06, input, 0x80, dest, 0x40)
             }
-            require(success);
+            require(success, "G1 point subtraction failed");
         }
     }
 
@@ -246,37 +233,37 @@ library Bn254 {
 
     function pointMulIntoDest(G1Point memory p, Fr memory s, G1Point memory dest) internal view {
         uint256[3] memory input;
-        input[0] = p.X;
-        input[1] = p.Y;
+        input[0] = p.x;
+        input[1] = p.y;
         input[2] = s.value;
         bool success;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            success := staticcall(gas(), 7, input, 0x60, dest, 0x40)
+            success := staticcall(gas(), 0x07, input, 0x60, dest, 0x40)
         }
-        require(success);
+        require(success, "G1 point multiplication failed");
     }
 
     function pairing(G1Point[] memory p1, G2Point[] memory p2) internal view returns (bool) {
-        require(p1.length == p2.length);
+        require(p1.length == p2.length, "Unmatched array length");
         uint256 elements = p1.length;
         uint256 inputSize = elements * 6;
         uint256[] memory input = new uint256[](inputSize);
         for (uint256 i = 0; i < elements; i++) {
-            input[i * 6 + 0] = p1[i].X;
-            input[i * 6 + 1] = p1[i].Y;
-            input[i * 6 + 2] = p2[i].X[0];
-            input[i * 6 + 3] = p2[i].X[1];
-            input[i * 6 + 4] = p2[i].Y[0];
-            input[i * 6 + 5] = p2[i].Y[1];
+            input[i * 6 + 0] = p1[i].x;
+            input[i * 6 + 1] = p1[i].y;
+            input[i * 6 + 2] = p2[i].x[0];
+            input[i * 6 + 3] = p2[i].x[1];
+            input[i * 6 + 4] = p2[i].y[0];
+            input[i * 6 + 5] = p2[i].y[1];
         }
         uint256[1] memory out;
         bool success;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            success := staticcall(gas(), 8, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
+            success := staticcall(gas(), 0x08, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
         }
-        require(success);
+        require(success, "Pairing check failed");
         return out[0] != 0;
     }
 

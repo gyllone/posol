@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./Bn254.sol";
 
 library Domain {
-    uint256 constant public SIZE = 2 ** 26;
+    uint256 constant public SIZE = 2 ** 27;
 
     function domainGenerator() internal pure returns (Bn254.Fr memory) {
         return Bn254.Fr(0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0);

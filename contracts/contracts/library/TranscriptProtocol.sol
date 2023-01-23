@@ -36,8 +36,8 @@ library TranscriptProtocol {
     }
 
     function appendG1(Transcript memory self, Bn254.G1Point memory p) internal pure {
-        appendUint256(self, p.X);
-        appendUint256(self, p.Y);
+        appendUint256(self, p.x);
+        appendUint256(self, p.y);
     }
 
     function challengeFr(Transcript memory self) internal pure returns (Bn254.Fr memory) {

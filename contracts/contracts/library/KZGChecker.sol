@@ -7,6 +7,7 @@ library KZGChecker {
     using Bn254 for Bn254.Fr;
     using Bn254 for Bn254.G1Point;
 
+    // solhint-disable-next-line func-name-mixedcase
     function X2() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
@@ -25,7 +26,7 @@ library KZGChecker {
         Bn254.Fr memory eval,
         Bn254.G1Point memory opening,
         Bn254.G1Point memory commitment
-    ) view internal returns (bool) {
+    ) internal view returns (bool) {
         Bn254.G1Point memory p1 = Bn254.P1();
         Bn254.G2Point memory p2 = Bn254.P2();
         Bn254.G2Point memory x2 = X2();
@@ -43,10 +44,10 @@ library KZGChecker {
         Bn254.Fr[] memory evals,
         Bn254.G1Point[] memory openings,
         Bn254.G1Point[] memory commitments
-    ) view internal returns (bool) {
-        require(points.length == evals.length, "Unmatched length");
-        require(points.length == openings.length, "Unmatched length");
-        require(points.length == commitments.length, "Unmatched length");
+    ) internal view returns (bool) {
+        require(points.length == evals.length, "Unmatched array length");
+        require(points.length == openings.length, "Unmatched array length");
+        require(points.length == commitments.length, "Unmatched array length");
         
         Bn254.G1Point memory p1 = Bn254.P1();
         Bn254.G2Point memory p2 = Bn254.P2();

@@ -33,18 +33,24 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    goerli: {
+      url: "https://goerli.infura.io/v3/54d13b257eb94b2eab1c7875e0d8d301",
+      chainId: 5,
+      accounts: ["d8d5513270fcd41f63d61f387bac3325c40629160cc2261b7231cbaa85dd3a62"],
     },
+    // ropsten: {
+    //   url: process.env.ROPSTEN_URL || "",
+    //   accounts:
+    //     process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    // },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: "Q6NGN1ISMG23YPAJRMTAXRDE11NPH22MQN",
+    // apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 

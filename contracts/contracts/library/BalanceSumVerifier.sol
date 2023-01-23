@@ -49,11 +49,31 @@ library BalanceSumVerifier {
             0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
         );
     }
+
+    function validateProof(Proof memory proof) internal pure {
+        proof.b.validateFr();
+        proof.t.validateFr();
+        proof.h1.validateFr();
+        proof.h2.validateFr();
+        proof.sNext.validateFr();
+        proof.zNext.validateFr();
+        proof.h1Next.validateFr();
+        proof.h2Next.validateFr();
+
+        proof.bCommit.validateG1();
+        proof.sCommit.validateG1();
+        proof.h1Commit.validateG1();
+        proof.h2Commit.validateG1();
+        proof.zCommit.validateG1();
+        proof.q1Commit.validateG1();
+        proof.q2Commit.validateG1();
+        proof.opening1.validateG1();
+        proof.opening2.validateG1();
+    }
     
     function evaluateVanishingPoly(Bn254.Fr memory tau) internal view returns (Bn254.Fr memory) {
         Bn254.Fr memory tmp = tau.pow(Domain.SIZE);
         tmp.subAssign(Bn254.Fr(1));
-
         return tmp;
     }
 
@@ -65,7 +85,6 @@ library BalanceSumVerifier {
         tmp.mulAssign(Bn254.Fr(Domain.SIZE));
         tmp.inverseAssign();
         tmp.mulAssign(zh);
-
         return tmp;
     }
 
@@ -79,7 +98,6 @@ library BalanceSumVerifier {
         tmp.inverseAssign();
         tmp.mulAssign(zh);
         tmp.mulAssign(omegaInv);
-
         return tmp;
     }
 
@@ -157,7 +175,7 @@ library BalanceSumVerifier {
     function computeEvaluation2(
         Proof memory proof,
         Challenges memory challenges
-    ) pure internal returns (Bn254.Fr memory) {
+    ) internal pure returns (Bn254.Fr memory) {
         Bn254.Fr memory evaluation = proof.sNext.cloneFr();
         Bn254.Fr memory tmp = proof.zNext.mul(challenges.etas[0]);
         evaluation.addAssign(tmp);
@@ -353,6 +371,9 @@ library BalanceSumVerifier {
     }
 
     function verify(Proof memory proof, Bn254.Fr memory m) internal view returns (bool) {
+        m.validateFr();
+        validateProof(proof);
+
         // Generate challenges via Fiat-Shamir algorithm
         Challenges memory challenges = generateChallenges(proof, m);
 
