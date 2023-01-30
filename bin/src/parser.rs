@@ -27,8 +27,7 @@ pub fn deser_from_file<De: CanonicalDeserialize>(path: &PathBuf) -> De {
         .read(true)
         .open(path)
         .unwrap_or_else(|_| panic!("unable to open file {:?}", path));
-    
-    CanonicalDeserialize::deserialize_uncompressed(file)
+    CanonicalDeserialize::deserialize_unchecked(file)
         .unwrap_or_else(|_| panic!("unable to deserialize file {:?}", path))
 }
 
@@ -38,6 +37,6 @@ pub fn ser_to_file<Se: CanonicalSerialize>(se: &Se, path: &PathBuf) {
         .create(true)
         .open(path)
         .unwrap_or_else(|_| panic!("unable to open file {:?}", path));
-    se.serialize_uncompressed(&mut file)
+    se.serialize_unchecked(&mut file)
         .unwrap_or_else(|_| panic!("unable to serialize file {:?}", path))
 }
