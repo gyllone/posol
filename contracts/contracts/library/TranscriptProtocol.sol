@@ -9,9 +9,9 @@ library TranscriptProtocol {
     // flip                    0xe000000000000000000000000000000000000000000000000000000000000000;
     uint256 constant private FR_MASK = 0x1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-    uint32 constant private DST_0 = 0;
-    uint32 constant private DST_1 = 1;
-    uint32 constant private DST_CHALLENGE = 2;
+    uint8 constant private DST_0 = 0;
+    uint8 constant private DST_1 = 1;
+    uint8 constant private DST_CHALLENGE = 2;
 
     struct Transcript {
         bytes32 state0;
@@ -23,6 +23,12 @@ library TranscriptProtocol {
         t.state0 = bytes32(0);
         t.state1 = bytes32(0);
         t.counter = 0;
+    }
+
+    function appendUint64(Transcript memory self, uint64 value) internal pure {
+        bytes32 oldState = self.state0;
+        self.state0 = keccak256(abi.encodePacked(DST_0, oldState, self.state1, value));
+        self.state1 = keccak256(abi.encodePacked(DST_1, oldState, self.state1, value));
     }
 
     function appendUint256(Transcript memory self, uint256 value) internal pure {

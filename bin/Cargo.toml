@@ -1,0 +1,28 @@
+[package]
+name = "posol-bin"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ark-ff = "0.3"
+ark-serialize = { version = "0.3", features = ["derive", "std"] }
+ark-poly = "0.3"
+ark-poly-commit = "0.3"
+ark-bn254 = { version = "0.3", features = ["default", "std"] }
+clap = { version = "4.1", features = ["default", "derive"] }
+ethereum-types = "0.14"
+hex = "0.4"
+rand_core = { version = "0.6", features = ["std"] }
+rand_xorshift = { version = "0.3", optional = true }
+rand = { version = "0.8", features = ["default", "getrandom"] }
+serde = { version = "1.0", features = ["derive", "std"] }
+serde_json = "1.0"
+sha3 = "0.10"
+itertools = "0.10"
+posol-core = { path = "../core" }
+
+[features]
+blinding = ["posol-core/blinding"]
+xs-rng = ["rand_xorshift"]

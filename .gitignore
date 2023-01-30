@@ -8,5 +8,5 @@ contracts/typechain
 contracts/node_modules
 contracts/package-lock.json
 
-core/target
+*/target
 *Cargo.lock

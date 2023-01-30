@@ -1,9 +1,11 @@
 
 mod linear_poly;
 mod quotient_poly;
+mod proof;
+mod transcript;
 
-pub mod proof;
-pub mod transcript;
+pub use proof::*;
+pub use transcript::*;
 
 use std::collections::HashMap;
 use anyhow::{anyhow, Result};
@@ -21,8 +23,6 @@ use crate::{
     commitment::HomomorphicCommitment,
     label_polynomial, label_commitment,
 };
-use proof::Proof;
-use transcript::TranscriptProtocol;
 
 pub fn precomute<F, D, PC>(
     ck: &PC::CommitterKey,
