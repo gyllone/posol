@@ -24,5 +24,6 @@ itertools = "0.10"
 posol-core = { path = "../core" }
 
 [features]
+print-trace = ["posol-core/print-trace"]
 blinding = ["posol-core/blinding"]
 xs-rng = ["rand_xorshift"]
