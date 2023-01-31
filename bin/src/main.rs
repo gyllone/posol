@@ -5,8 +5,8 @@ mod xs_rng;
 
 use std::path::PathBuf;
 use ark_ec::{AffineCurve, PairingEngine};
-use ark_ff::{FftParameters, UniformRand, ToBytes, FromBytes};
-use ark_bn254::{Fr, FrParameters, Bn254};
+use ark_ff::{FftParameters, UniformRand, ToBytes, FromBytes, One};
+use ark_bn254::{Fr, FrParameters, Bn254, G1Affine};
 use ark_poly::{GeneralEvaluationDomain, univariate::DensePolynomial, EvaluationDomain};
 use ark_poly_commit::{PolynomialCommitment, LabeledPolynomial};
 use ark_serialize::*;
@@ -192,13 +192,13 @@ fn main() {
             ).expect("individual open for tag failed");
 
             let domain = GeneralEvaluationDomain::<Fr>::new(n).unwrap();
-            assert!(kzg_check(
+            kzg_check(
                 &cvk,
                 &witness.tag_commit,
                 domain.element(user_index),
                 Fr::read(&users_data[user_index].id[..]).unwrap(),
                 &tag_opening,
-            ));
+            );
 
             let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
@@ -249,15 +249,10 @@ fn kzg_check(
     point: Fr,
     value: Fr,
     proof: &KZG10Proof<Bn254>,
-) -> bool {
-    let mut inner = comm.0.into_projective() - &vk.g.mul(value);
-    if let Some(random_v) = proof.random_v {
-        inner -= &vk.gamma_g.mul(random_v);
-    }
-    let lhs = Bn254::pairing(inner, vk.h);
-
-    let inner = vk.beta_h.into_projective() - &vk.h.mul(point);
-    let rhs = Bn254::pairing(proof.w, inner);
-
-    lhs == rhs
+) {
+    let lhs = vk.g.mul(value) - comm.0.into_projective() - proof.w.mul(point);
+    let a = (proof.w.clone().into(), vk.beta_h.clone().into());
+    let b = (G1Affine::from(lhs).into(), vk.h.clone().into());
+    
+    assert!(Bn254::product_of_pairings([&a, &b]).is_one());
 }
