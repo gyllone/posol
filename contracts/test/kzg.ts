@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
+describe("KZGChecker", function () {
+  it("Should pass kzg checking", async function () {
+    const Greeter = await ethers.getContractFactory("KZG");
     const greeter = await Greeter.deploy("Hello, world!");
     await greeter.deployed();
 
