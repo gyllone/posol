@@ -15,7 +15,7 @@ use rand::Rng;
 use itertools::Itertools;
 use posol_core::{
     balance_sum, tag,
-    commitment::{KZG10, KZG10Commitment, KZG10CommitterKey},
+    commitment::{KZG10, KZG10Commitment, KZG10CommitterKey, KZG10VerifierKey},
 };
 use transcript::Transcript;
 use parser::*;
@@ -32,6 +32,10 @@ enum Args {
     SetupKZG {
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
+        #[arg(long = "cvk-path")]
+        cvk_path: PathBuf,
+    },
+    ShowKZG {
         #[arg(long = "cvk-path")]
         cvk_path: PathBuf,
     },
@@ -95,6 +99,14 @@ fn main() {
                 None,
             ).unwrap();
 
+            println!("G: x: {:#}", &cvk.g.x);
+            println!("G: y: {:#}", &cvk.g.y);
+
+            println!("H: x-c0: {:#}", &cvk.h.x.c0);
+            println!("H: x-c1: {:#}", &cvk.h.x.c1);
+            println!("H: y-c0: {:#}", &cvk.h.y.c0);
+            println!("H: y-c1: {:#}", &cvk.h.y.c1);
+
             println!("Beta H: x-c0: {:#}", &cvk.beta_h.x.c0);
             println!("Beta H: x-c1: {:#}", &cvk.beta_h.x.c1);
             println!("Beta H: y-c0: {:#}", &cvk.beta_h.y.c0);
@@ -102,6 +114,22 @@ fn main() {
 
             ser_to_file(&ck, &ck_path);
             ser_to_file(&cvk, &cvk_path);
+        }
+        Args::ShowKZG { cvk_path } => {
+            let cvk: KZG10VerifierKey<Bn254> = deser_from_file(&cvk_path);
+            
+            println!("G: x: {:#}", &cvk.g.x);
+            println!("G: y: {:#}", &cvk.g.y);
+
+            println!("H: x-c0: {:#}", &cvk.h.x.c0);
+            println!("H: x-c1: {:#}", &cvk.h.x.c1);
+            println!("H: y-c0: {:#}", &cvk.h.y.c0);
+            println!("H: y-c1: {:#}", &cvk.h.y.c1);
+
+            println!("Beta H: x-c0: {:#}", &cvk.beta_h.x.c0);
+            println!("Beta H: x-c1: {:#}", &cvk.beta_h.x.c1);
+            println!("Beta H: y-c0: {:#}", &cvk.beta_h.y.c0);
+            println!("Beta H: y-c1: {:#}", &cvk.beta_h.y.c1);
         }
         Args::ProveAndCommit {
             ck_path,

@@ -30,6 +30,11 @@ pub type KZG10CommitterKey<E> = <KZG10<E> as PolynomialCommitment<
     <E as PairingEngine>::Fr,
     DensePolynomial<<E as PairingEngine>::Fr>
 >>::CommitterKey;
+/// KZG10 verifier key
+pub type KZG10VerifierKey<E> = <KZG10<E> as PolynomialCommitment<
+    <E as PairingEngine>::Fr,
+    DensePolynomial<<E as PairingEngine>::Fr>
+>>::VerifierKey;
 
 impl<E> HomomorphicCommitment<E::Fr> for KZG10<E>
 where
