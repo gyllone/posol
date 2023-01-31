@@ -81,11 +81,6 @@ library Bn254 {
         require(success, "Fr pow operation failed");
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function P1() internal pure returns (G1Point memory) {
-        return G1Point(1, 2);
-    }
-
     function validateG1(G1Point memory self) internal pure {
         if (self.x == 0 && self.y == 0) {
             return;
@@ -110,21 +105,6 @@ library Bn254 {
 
     function cloneG1(G1Point memory self) internal pure returns (G1Point memory result) {
         return G1Point(self.x, self.y);
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function P2() internal pure returns (G2Point memory) {
-        // for some reason ethereum expects to have c1*v + c0 form
-        return G2Point(
-            [
-                10857046999023057135944570762232829481370756359578518086990519993285655852781,
-                11559732032986387107991004021392285783925812861821192530917403151452391805634
-            ],
-            [
-                8495653923123431417604973247489272438418190587263600148770280649306958101930,
-                4082367875863433681332203403145435568316851327593401208105741076214120093531
-            ]
-        );
     }
 
     function pointNegate(G1Point memory self) internal pure returns (G1Point memory result) {
