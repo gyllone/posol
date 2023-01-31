@@ -35,6 +35,11 @@ pub type KZG10VerifierKey<E> = <KZG10<E> as PolynomialCommitment<
     <E as PairingEngine>::Fr,
     DensePolynomial<<E as PairingEngine>::Fr>
 >>::VerifierKey;
+/// KZG10 Proof
+pub type KZG10Proof<E> = <KZG10<E> as PolynomialCommitment<
+    <E as PairingEngine>::Fr,
+    DensePolynomial<<E as PairingEngine>::Fr>
+>>::Proof;
 
 impl<E> HomomorphicCommitment<E::Fr> for KZG10<E>
 where
@@ -67,6 +72,21 @@ pub type IPACommitment<G, D> = <IPA<G, D> as PolynomialCommitment<
     <G as AffineCurve>::ScalarField,
     DensePolynomial<<G as AffineCurve>::ScalarField>,
 >>::Commitment;
+/// IPA Committer Key
+pub type IPACommitterKey<G, D> = <IPA<G, D> as PolynomialCommitment<
+    <G as AffineCurve>::ScalarField,
+    DensePolynomial<<G as AffineCurve>::ScalarField>,
+>>::CommitterKey;
+/// IPA Verifier Key
+pub type IPAVerifierKey<G, D> = <IPA<G, D> as PolynomialCommitment<
+    <G as AffineCurve>::ScalarField,
+    DensePolynomial<<G as AffineCurve>::ScalarField>,
+>>::VerifierKey;
+/// IPA Proof
+pub type IPAProof<G, D> = <IPA<G, D> as PolynomialCommitment<
+    <G as AffineCurve>::ScalarField,
+    DensePolynomial<<G as AffineCurve>::ScalarField>,
+>>::Proof;
 
 use blake2::digest::{Digest, Update};
 use itertools::Itertools;
