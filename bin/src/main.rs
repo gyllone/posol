@@ -94,6 +94,12 @@ fn main() {
                 0,
                 None,
             ).unwrap();
+
+            println!("Beta H: x-c0: {:#}", &cvk.beta_h.x.c0);
+            println!("Beta H: x-c1: {:#}", &cvk.beta_h.x.c1);
+            println!("Beta H: y-c0: {:#}", &cvk.beta_h.y.c0);
+            println!("Beta H: y-c1: {:#}", &cvk.beta_h.y.c1);
+
             ser_to_file(&ck, &ck_path);
             ser_to_file(&cvk, &cvk_path);
         }
@@ -123,14 +129,14 @@ fn main() {
                 tag::commit::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n, &tags)
                     .expect("commit to tags failed");
 
-            // TODO: submit tag_commit on chain
-            println!("tag commit: {:#?}", &tag_commit);
+            // // TODO: submit tag_commit on chain
+            // println!("tag commit: {:#?}", &tag_commit);
                     
             // prove and commit for balances sum
             let (labeled_t_poly, t_commit) =
                 balance_sum::precomute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n)
                     .expect("precomute for balances sum failed");
-            let (m, proof, labeled_b_poly) =
+            let (_m, proof, labeled_b_poly) =
                 balance_sum::prove::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>, Transcript, _>(
                     &ck,
                     n,
@@ -141,8 +147,8 @@ fn main() {
                 ).expect("prove for balances sum failed");
             
             // TODO: submit balance sum and proof on chain
-            println!("balance sum: {:#?}", &m);
-            println!("proof: {:#?}", &proof);
+            println!("t commit: x: {:#}", &t_commit.0.x);
+            println!("t commit: y: {:#}", &t_commit.0.y);
 
             let witness = Witness {
                 tag_commit,
@@ -163,7 +169,7 @@ fn main() {
 
             let witness: Witness = deser_from_file(&witness_path);
 
-            let tag_opening = tag::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+            let _tag_opening = tag::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
                 n,
                 user_index,
@@ -171,17 +177,13 @@ fn main() {
                 &witness.tag_commit,
             ).expect("individual open for tag failed");
 
-            println!("tag opening: {:#?}", tag_opening);
-
-            let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+            let _b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
                 n,
                 user_index,
                 &witness.labeled_b_poly,
                 &witness.b_commit,
             ).expect("individual open for balance failed");
-
-            println!("balance opening: {:#?}", b_opening);
         }
     }
 }
