@@ -1,4 +1,5 @@
 use ark_ff::FftField;
+use ark_std::{start_timer, end_timer};
 use ark_poly::{univariate::DensePolynomial, EvaluationDomain, Polynomial};
 use anyhow::{anyhow, Result};
 #[cfg(feature = "parallel")]
@@ -28,6 +29,8 @@ where
     F: FftField,
     D: EvaluationDomain<F>,
 {
+    let timer = start_timer!(|| "Balance Sum: Computing Quotient Polynomial");
+
     let n = domain.size();
     if cfg!(blinding) {
         // Size of quotient poly is 2n+6 <= 4n => n >= 3
@@ -155,6 +158,8 @@ where
     } else {
         assert!(q_poly.degree() <= 2 * n);
     }
+
+    end_timer!(timer);
 
     Ok(q_poly)
 }

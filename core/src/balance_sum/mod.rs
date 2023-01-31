@@ -7,9 +7,8 @@ mod transcript;
 pub use proof::*;
 pub use transcript::*;
 
-use std::collections::HashMap;
 use anyhow::{anyhow, Result};
-use ark_std::{start_timer, end_timer};
+use ark_std::{collections::HashMap, start_timer, end_timer};
 use ark_ff::{FftField, Field};
 use ark_poly::{EvaluationDomain, univariate::DensePolynomial, UVPolynomial};
 use ark_poly_commit::{PCRandomness, LabeledPolynomial};

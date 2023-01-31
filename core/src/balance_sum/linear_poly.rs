@@ -1,4 +1,5 @@
-use std::ops::{AddAssign, SubAssign};
+use core::ops::{AddAssign, SubAssign};
+use ark_std::{start_timer, end_timer};
 use ark_ff::FftField;
 use ark_poly::{univariate::DensePolynomial, EvaluationDomain, Polynomial};
 use num_traits::Zero;
@@ -25,6 +26,8 @@ where
     F: FftField,
     D: EvaluationDomain<F> + EvaluationDomainExt<F>,
 {
+    let timer = start_timer!(|| "Balance Sum: Computing Linear Polynomial");
+
     let n = domain.size();
 
     let b_eval = b_poly.evaluate(&z);
@@ -85,6 +88,8 @@ where
         h1_next: h1_next_eval,
         h2_next: h2_next_eval,
     };
+
+    end_timer!(timer);
 
     (r_poly, evaluations)
 }

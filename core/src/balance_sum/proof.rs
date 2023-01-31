@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 use ark_std::{start_timer, end_timer};
 use ark_ff::FftField;
 use ark_poly::EvaluationDomain;
