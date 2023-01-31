@@ -44,7 +44,7 @@ enum Args {
         witness_path: PathBuf,
     },
     SupplyWitness {
-        #[arg(long = "users-path", value_parser)]
+        #[arg(long = "user-index", value_parser)]
         user_index: usize,
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
