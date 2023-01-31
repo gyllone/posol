@@ -54,8 +54,8 @@ library BalanceSumVerifier {
         //      0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d
         //  ]
         return Bn254.G1Point(
-            0x1c9ef807e980eafdbffc1b5d82676fba8ea62570769d35710df3e299259ace43,
-            0x05acd16abd169845dbf03d4696d77106ef51fdead90415baff898609d5254c2a
+            0x181860e2fd62bc0496bc6190bff085ae9003262733273be53e40c2e2a7956708,
+            0x0a2218bb1edc04bb7a4b1c63a225e56a21fccb7ef3c948634c767e3da1b159f8
         );
     }
 
@@ -328,7 +328,7 @@ library BalanceSumVerifier {
     ) internal pure returns (Challenges memory) {
         // Initialize transcript
         TranscriptProtocol.Transcript memory transcript = TranscriptProtocol.newTranscript();
-        transcript.appendUint256(Domain.SIZE);
+        transcript.appendUint64(Domain.SIZE);
 
         transcript.appendFr(m);
         transcript.appendG1(proof.bCommit);

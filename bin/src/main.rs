@@ -136,6 +136,10 @@ fn main() {
             let (labeled_t_poly, t_commit) =
                 balance_sum::precomute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n)
                     .expect("precomute for balances sum failed");
+
+            println!("t commit: x: {:#}", &t_commit.0.x);
+            println!("t commit: y: {:#}", &t_commit.0.y);
+
             let (_m, proof, labeled_b_poly) =
                 balance_sum::prove::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>, Transcript, _>(
                     &ck,
@@ -145,10 +149,6 @@ fn main() {
                     &balances,
                     rng,
                 ).expect("prove for balances sum failed");
-            
-            // TODO: submit balance sum and proof on chain
-            println!("t commit: x: {:#}", &t_commit.0.x);
-            println!("t commit: y: {:#}", &t_commit.0.y);
 
             let witness = Witness {
                 tag_commit,
