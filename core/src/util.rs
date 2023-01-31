@@ -65,6 +65,8 @@ where
 {
     /// Returns a fixed generator of the subgroup.
     fn group_gen(&self) -> F;
+    /// Returns the inverse of the fixed generator of the subgroup.
+    fn group_gen_inv(&self) -> F;
 }
 
 impl<F> EvaluationDomainExt<F> for GeneralEvaluationDomain<F>
@@ -76,6 +78,14 @@ where
         match self {
             GeneralEvaluationDomain::Radix2(domain) => domain.group_gen,
             GeneralEvaluationDomain::MixedRadix(domain) => domain.group_gen,
+        }
+    }
+
+    #[inline]
+    fn group_gen_inv(&self) -> F {
+        match self {
+            GeneralEvaluationDomain::Radix2(domain) => domain.group_gen_inv,
+            GeneralEvaluationDomain::MixedRadix(domain) => domain.group_gen_inv,
         }
     }
 }

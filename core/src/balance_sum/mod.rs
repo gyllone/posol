@@ -665,4 +665,12 @@ mod test {
         );
         assert!(res.is_ok());
     }
+
+    #[test]
+    fn test_domain() {
+        let domain = GeneralEvaluationDomain::<Fr>::new(1 << 27).unwrap();
+        println!("omega {:#}", domain.group_gen());
+        println!("omega_inv {:#}", domain.group_gen_inv());
+    }
+
 }

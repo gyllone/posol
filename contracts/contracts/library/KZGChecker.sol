@@ -11,12 +11,12 @@ library KZGChecker {
     function X2() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
-                0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2,
-                0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed
+                0x250509b6fd346fb4986ceb3e3c2ae1352b91a2899c44a9bff7347f9309d5b2bb,
+                0x0205238886dab0bbd5326f37072d4e59033807777f1dd0ac69b6a576d4298df7
             ],
             [
-                0x090689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b,
-                0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa
+                0x0850c0444822f06b1f53da68c3ff950b1864b1982df33d23ea342ba16b713917,
+                0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d
             ]
         );
     }

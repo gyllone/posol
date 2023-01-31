@@ -44,6 +44,15 @@ library BalanceSumVerifier {
 
     // Precomputed [t(X)]
     function tCommit() internal pure returns (Bn254.G1Point memory) {
+        // matched with X2
+        //  [
+        //      0x250509b6fd346fb4986ceb3e3c2ae1352b91a2899c44a9bff7347f9309d5b2bb,
+        //      0x0205238886dab0bbd5326f37072d4e59033807777f1dd0ac69b6a576d4298df7
+        //  ],
+        //  [
+        //      0x0850c0444822f06b1f53da68c3ff950b1864b1982df33d23ea342ba16b713917,
+        //      0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d
+        //  ]
         return Bn254.G1Point(
             0x1c9ef807e980eafdbffc1b5d82676fba8ea62570769d35710df3e299259ace43,
             0x05acd16abd169845dbf03d4696d77106ef51fdead90415baff898609d5254c2a
