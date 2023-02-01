@@ -156,7 +156,6 @@ library Bn254 {
             input[1] = p1.y;
             input[2] = p2.x;
             input[3] = p2.y;
-
             bool success;
             // solhint-disable-next-line no-inline-assembly
             assembly {
@@ -192,8 +191,7 @@ library Bn254 {
             input[1] = p1.y;
             input[2] = p2.x;
             input[3] = Q_MOD - p2.y;
-
-            bool success = false;
+            bool success;
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 success := staticcall(gas(), 0x06, input, 0x80, dest, 0x40)
@@ -224,18 +222,18 @@ library Bn254 {
         require(success, "G1 point multiplication failed");
     }
 
-    function pairing(G1Point[] memory p1, G2Point[] memory p2) internal view returns (bool) {
-        require(p1.length == p2.length, "Unmatched array length");
-        uint256 elements = p1.length;
+    function pairing(G1Point[] memory g1, G2Point[] memory g2) internal view returns (bool) {
+        require(g1.length == g2.length, "Unmatched array length");
+        uint256 elements = g1.length;
         uint256 inputSize = elements * 6;
         uint256[] memory input = new uint256[](inputSize);
         for (uint256 i = 0; i < elements; i++) {
-            input[i * 6 + 0] = p1[i].x;
-            input[i * 6 + 1] = p1[i].y;
-            input[i * 6 + 2] = p2[i].x[0];
-            input[i * 6 + 3] = p2[i].x[1];
-            input[i * 6 + 4] = p2[i].y[0];
-            input[i * 6 + 5] = p2[i].y[1];
+            input[i * 6 + 0] = g1[i].x;
+            input[i * 6 + 1] = g1[i].y;
+            input[i * 6 + 2] = g2[i].x[0];
+            input[i * 6 + 3] = g2[i].x[1];
+            input[i * 6 + 4] = g2[i].y[0];
+            input[i * 6 + 5] = g2[i].y[1];
         }
         uint256[1] memory out;
         bool success;
@@ -254,12 +252,12 @@ library Bn254 {
         G1Point memory b1,
         G2Point memory b2
     ) internal view returns (bool) {
-        G1Point[] memory p1 = new G1Point[](2);
-        G2Point[] memory p2 = new G2Point[](2);
-        p1[0] = a1;
-        p1[1] = b1;
-        p2[0] = a2;
-        p2[1] = b2;
-        return pairing(p1, p2);
+        G1Point[] memory g1 = new G1Point[](2);
+        G2Point[] memory g2 = new G2Point[](2);
+        g1[0] = a1;
+        g1[1] = b1;
+        g2[0] = a2;
+        g2[1] = b2;
+        return pairing(g1, g2);
     }
 }

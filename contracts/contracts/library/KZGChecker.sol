@@ -17,12 +17,12 @@ library KZGChecker {
     function pointH() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
-                0x0f0936e100281a45b0768dfb1463cd67287443927e59fffc538be08caa06c459,
-                0x2ee2102c718f1f9d8a59a1cae20c6253af391aafb53a3cfa73e6610a931a5302
+                0x2ee2102c718f1f9d8a59a1cae20c6253af391aafb53a3cfa73e6610a931a5302,
+                0x0f0936e100281a45b0768dfb1463cd67287443927e59fffc538be08caa06c459
             ],
             [
-                0x043673183bfd89ef388ee5eb48de3ced289ec31b96650ddc1f795ee8c9a84407,
-                0x24a795d278f59445131295993962ee26056217efc1b3c1420dab196aacf686f0
+                0x24a795d278f59445131295993962ee26056217efc1b3c1420dab196aacf686f0,
+                0x043673183bfd89ef388ee5eb48de3ced289ec31b96650ddc1f795ee8c9a84407
             ]
         );
     }
@@ -30,12 +30,12 @@ library KZGChecker {
     function pointBetaH() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
-                0x250509b6fd346fb4986ceb3e3c2ae1352b91a2899c44a9bff7347f9309d5b2bb,
-                0x0205238886dab0bbd5326f37072d4e59033807777f1dd0ac69b6a576d4298df7
+                0x0205238886dab0bbd5326f37072d4e59033807777f1dd0ac69b6a576d4298df7,
+                0x250509b6fd346fb4986ceb3e3c2ae1352b91a2899c44a9bff7347f9309d5b2bb
             ],
             [
-                0x0850c0444822f06b1f53da68c3ff950b1864b1982df33d23ea342ba16b713917,
-                0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d
+                0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d,
+                0x0850c0444822f06b1f53da68c3ff950b1864b1982df33d23ea342ba16b713917
             ]
         );
     }
