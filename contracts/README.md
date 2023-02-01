@@ -1,3 +1,3 @@
 # PoSol Verifying Contract
 
-Goerli: 0xb7c06f2B7eFC6909e9789288a503d15565f79ca8
+Goerli: 0x352833f7a4214c0DCcd9AC09DFD1775823fad79E
