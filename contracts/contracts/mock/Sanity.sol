@@ -5,6 +5,7 @@ import "../library/Bn254.sol";
 import "../library/Domain.sol";
 import "../library/KZGChecker.sol";
 
+/// Sanity check for library. All data comes from benchmark
 contract SanityChecker {
     using Bn254 for Bn254.G1Point;
     
@@ -16,7 +17,7 @@ contract SanityChecker {
         );
     }
 
-    function checkG1() public view {
+    function checkG1Add() public view {
         Bn254.G1Point memory a = Bn254.G1Point(
             0x08619b0c2bc95ba3b5e6f720d4f5bcfceb62d455173d554ab7cefaaa4b42f09f,
             0x13fc65dd4e5c6b90d42b8741fe2821e82c0bd8a6d5a43d27a5221d9313f27d48
