@@ -1,3 +1,4 @@
+mod abi;
 mod parser;
 mod transcript;
 #[cfg(feature = "xs-rng")]
@@ -45,8 +46,6 @@ enum Args {
         user_index: usize,
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
-        #[arg(long = "cvk-path")]
-        cvk_path: PathBuf,
         #[arg(long = "users-path")]
         users_path: PathBuf,
         #[arg(long = "witness-path")]
@@ -96,18 +95,18 @@ fn main() {
                 None,
             ).unwrap();
 
-            println!("G: x: {:#}", &cvk.g.x);
-            println!("G: y: {:#}", &cvk.g.y);
+            println!("G: x: {}", &cvk.g.x);
+            println!("G: y: {}", &cvk.g.y);
 
-            println!("H: x-c0: {:#}", &cvk.h.x.c0);
-            println!("H: x-c1: {:#}", &cvk.h.x.c1);
-            println!("H: y-c0: {:#}", &cvk.h.y.c0);
-            println!("H: y-c1: {:#}", &cvk.h.y.c1);
+            println!("H: x-c0: {}", &cvk.h.x.c0);
+            println!("H: x-c1: {}", &cvk.h.x.c1);
+            println!("H: y-c0: {}", &cvk.h.y.c0);
+            println!("H: y-c1: {}", &cvk.h.y.c1);
 
-            println!("Beta H: x-c0: {:#}", &cvk.beta_h.x.c0);
-            println!("Beta H: x-c1: {:#}", &cvk.beta_h.x.c1);
-            println!("Beta H: y-c0: {:#}", &cvk.beta_h.y.c0);
-            println!("Beta H: y-c1: {:#}", &cvk.beta_h.y.c1);
+            println!("Beta H: x-c0: {}", &cvk.beta_h.x.c0);
+            println!("Beta H: x-c1: {}", &cvk.beta_h.x.c1);
+            println!("Beta H: y-c0: {}", &cvk.beta_h.y.c0);
+            println!("Beta H: y-c1: {}", &cvk.beta_h.y.c1);
 
             ser_to_file(&ck, &ck_path);
             ser_to_file(&cvk, &cvk_path);
@@ -138,18 +137,17 @@ fn main() {
                 tag::commit::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n, &tags)
                     .expect("commit to tags failed");
 
-            // // TODO: submit tag_commit on chain
-            // println!("tag commit: {:#?}", &tag_commit);
+            println!("abi tag commit: {}", abi::tokenize_g1(&tag_commit.0));
                     
             // prove and commit for balances sum
             let (labeled_t_poly, t_commit) =
                 balance_sum::precomute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n)
                     .expect("precomute for balances sum failed");
 
-            println!("t commit: x: {:#}", &t_commit.0.x);
-            println!("t commit: y: {:#}", &t_commit.0.y);
+            println!("t commit: x: {}", &t_commit.0.x);
+            println!("t commit: y: {}", &t_commit.0.y);
 
-            let (_m, proof, labeled_b_poly) =
+            let (m, proof, labeled_b_poly) =
                 balance_sum::prove::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>, Transcript, _>(
                     &ck,
                     n,
@@ -158,6 +156,9 @@ fn main() {
                     &balances,
                     rng,
                 ).expect("prove for balances sum failed");
+
+            println!("abi balance sum: {}", abi::tokenize_fr(&m));
+            println!("abi proof: {}", abi::tokenize_sum_proof(&proof));
 
             let witness = Witness {
                 tag_commit,
@@ -170,14 +171,12 @@ fn main() {
         Args::SupplyWitness {
             user_index,
             ck_path,
-            cvk_path,
             users_path,
             witness_path,
         } => {
             let n = max_domain_size();
 
             let ck: KZG10CommitterKey<Bn254> = deser_from_file(&ck_path);
-            let cvk: KZG10VerifierKey<Bn254> = deser_from_file(&cvk_path);
             let witness: Witness = deser_from_file(&witness_path);
             let users_data: Vec<UserInfo> = json_from_file(&users_path);
             assert!(users_data.len() <= n);
@@ -190,14 +189,8 @@ fn main() {
                 &witness.tag_commit,
             ).expect("individual open for tag failed");
 
-            tag::individual_verify::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
-                &cvk,
-                n,
-                user_index,
-                &users_data[user_index].id,
-                &witness.tag_commit,
-                &tag_opening,
-            ).expect("individual verify for tag failed");
+            println!("abi tag: {}", abi::tokenize_bytes32(&users_data[user_index].id));
+            println!("abi tag opening: {}", abi::tokenize_g1(&tag_opening.w));
 
             let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
@@ -207,14 +200,8 @@ fn main() {
                 &witness.b_commit,
             ).expect("individual open for balance failed");
 
-            balance_sum::individual_verify::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
-                &cvk,
-                n,
-                user_index,
-                users_data[user_index].balance,
-                &witness.b_commit,
-                &b_opening,
-            ).expect("individual verify for balance failed");
+            println!("abi balance: {}", users_data[user_index].balance);
+            println!("abi balance opening: {}", abi::tokenize_g1(&b_opening.w));
         }
     }
 }

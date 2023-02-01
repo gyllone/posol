@@ -12,6 +12,7 @@ ark-poly = "0.3"
 ark-poly-commit = "0.3"
 ark-bn254 = { version = "0.3", features = ["default", "std"] }
 clap = { version = "4.1", features = ["default", "derive"] }
+ethabi = "18.0.0"
 ethereum-types = "0.14"
 hex = "0.4"
 rand_core = { version = "0.6", features = ["std"] }
