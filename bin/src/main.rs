@@ -4,10 +4,9 @@ mod transcript;
 mod xs_rng;
 
 use std::path::PathBuf;
-use ark_ec::{AffineCurve, PairingEngine};
-use ark_ff::{FftParameters, UniformRand, ToBytes, FromBytes, One};
-use ark_bn254::{Fr, FrParameters, Bn254, G1Affine};
-use ark_poly::{GeneralEvaluationDomain, univariate::DensePolynomial, EvaluationDomain};
+use ark_ff::{FftParameters, UniformRand, ToBytes};
+use ark_bn254::{Fr, FrParameters, Bn254};
+use ark_poly::{GeneralEvaluationDomain, univariate::DensePolynomial};
 use ark_poly_commit::{PolynomialCommitment, LabeledPolynomial};
 use ark_serialize::*;
 use clap::Parser;
@@ -191,14 +190,14 @@ fn main() {
                 &witness.tag_commit,
             ).expect("individual open for tag failed");
 
-            let domain = GeneralEvaluationDomain::<Fr>::new(n).unwrap();
-            kzg_check(
+            tag::individual_verify::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &cvk,
+                n,
+                user_index,
+                &users_data[user_index].id,
                 &witness.tag_commit,
-                domain.element(user_index),
-                Fr::read(&users_data[user_index].id[..]).unwrap(),
                 &tag_opening,
-            );
+            ).expect("individual verify for tag failed");
 
             let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
@@ -241,18 +240,4 @@ fn max_domain_size() -> usize {
     } else {
         (1usize << two_adicity) / 2
     }
-}
-
-fn kzg_check(
-    vk: &KZG10VerifierKey<Bn254>,
-    comm: &KZG10Commitment<Bn254>,
-    point: Fr,
-    value: Fr,
-    proof: &KZG10Proof<Bn254>,
-) {
-    let lhs = vk.g.mul(value) - comm.0.into_projective() - proof.w.mul(point);
-    let a = (proof.w.clone().into(), vk.beta_h.clone().into());
-    let b = (G1Affine::from(lhs).into(), vk.h.clone().into());
-    
-    assert!(Bn254::product_of_pairings([&a, &b]).is_one());
 }
