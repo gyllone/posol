@@ -5,24 +5,23 @@ mod transcript;
 mod xs_rng;
 
 use std::path::PathBuf;
-use ark_ff::{FftParameters, UniformRand, ToBytes};
-use ark_bn254::{Fr, FrParameters, Bn254};
-use ark_poly::{GeneralEvaluationDomain, univariate::DensePolynomial};
+use ark_ff::{UniformRand, ToBytes};
+use ark_bn254::{Fr, Bn254};
+use ark_poly::{GeneralEvaluationDomain, univariate::DensePolynomial, EvaluationDomain};
 use ark_poly_commit::{PolynomialCommitment, LabeledPolynomial};
 use ark_serialize::*;
 use clap::Parser;
-use futures::executor::block_on;
 use serde::{Serialize, Deserialize};
 use rand::Rng;
 use itertools::Itertools;
 use web3::{
-    ethabi, Transport,
+    ethabi,
     api::{Eth, Namespace},
     types::Address,
     contract::Contract,
     transports::Http,
 };
-use posol_core::{balance_sum, tag, commitment::*};
+use posol_core::{balance_sum, tag, util::EvaluationDomainExt, commitment::*};
 use transcript::Transcript;
 use parser::*;
 
@@ -118,9 +117,14 @@ fn main() {
             #[cfg(not(feature = "xs-rng"))]
             let rng = &mut rand::thread_rng();
 
-            let max_degree = if cfg!(blinding) { domain_size + 3 } else { domain_size };
+            let domain = GeneralEvaluationDomain::<Fr>::new(domain_size)
+                .expect("invalid domain size");
+            println!("domain group gen: {}", domain.group_gen());
+            println!("domain group gen inv: {}", domain.group_gen_inv());
 
-            let pp = KZG10::<Bn254>::setup(max_degree, None, rng).unwrap();
+            let max_degree = if cfg!(blinding) { domain_size + 3 } else { domain_size };
+            let pp = KZG10::<Bn254>::setup(max_degree, None, rng)
+                .expect("invalid max degree");
             let (ck, cvk) = KZG10::<Bn254>::trim(
                 &pp,
                 max_degree,

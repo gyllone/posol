@@ -11,6 +11,8 @@ library BalanceSumVerifier {
     using Bn254 for Bn254.G1Point;
     using TranscriptProtocol for TranscriptProtocol.Transcript;
 
+    bool constant private BLINDING = false;
+
     struct Proof {
         // Evluations
         Bn254.Fr b;
@@ -322,6 +324,12 @@ library BalanceSumVerifier {
         scalar.copyFromFr(zh);
         scalar.addAssign(one);
         scalar.mulAssign(zh);
+        if (BLINDING) {
+            // scalar = -zh * (zh + 1) * z^3
+            scalar.mulAssign(challenges.z);
+            scalar.mulAssign(challenges.z);
+            scalar.mulAssign(challenges.z);
+        }
         // scalar * [q2(X)]
         tmpPoint.copyFromG1(proof.q2Commit);
         tmpPoint.pointMulAssign(scalar);
