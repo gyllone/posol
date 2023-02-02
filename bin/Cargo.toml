@@ -12,8 +12,8 @@ ark-poly = "0.3"
 ark-poly-commit = "0.3"
 ark-bn254 = { version = "0.3", features = ["default", "std"] }
 clap = { version = "4.1", features = ["default", "derive"] }
-ethabi = "18.0.0"
 ethereum-types = "0.14"
+futures = "0.3"
 hex = "0.4"
 rand_core = { version = "0.6", features = ["std"] }
 rand_xorshift = { version = "0.3", optional = true }
@@ -21,6 +21,7 @@ rand = { version = "0.8", features = ["default", "getrandom"] }
 serde = { version = "1.0", features = ["derive", "std"] }
 serde_json = "1.0"
 sha3 = "0.10"
+web3 = "0.18.0"
 itertools = "0.10"
 posol-core = { path = "../core" }
 
