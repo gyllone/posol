@@ -44,7 +44,7 @@ impl TranscriptProtocol<Fr, KZG10Commitment<Bn254>> for Transcript {
     }
 
     fn append_u64(&mut self, _label: &'static str, item: u64) {
-        self.append_bytes_without_label(&item.to_le_bytes());
+        self.append_bytes_without_label(&item.to_be_bytes());
     }
 
     fn append_scalar(&mut self, _label: &'static str, item: &Fr) {
@@ -57,7 +57,7 @@ impl TranscriptProtocol<Fr, KZG10Commitment<Bn254>> for Transcript {
     }
 
     fn challenge_scalar(&mut self, _label: &'static str) -> Fr {
-        let mut data = Vec::with_capacity(1 + 32 + 32 + 8);
+        let mut data = Vec::with_capacity(1 + 32 + 32 + 4);
         data.push(DST_CHALLENGE);
         data.extend_from_slice(self.state_0.as_bytes());
         data.extend_from_slice(self.state_1.as_bytes());
@@ -65,7 +65,45 @@ impl TranscriptProtocol<Fr, KZG10Commitment<Bn254>> for Transcript {
         self.counter += 1;
         
         let mut query = Keccak256::digest(&data);
-        query[31] &= 0b0001_1111;
+        query.reverse();
+        query[31] &= 0x1f;
         Fr::read(&query[..32]).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use ark_bn254::{G1Affine, Fq};
+    use ark_poly_commit::kzg10::Commitment;
+    use hex_literal::hex;
+
+    use super::*;
+
+    #[test]
+    fn test_transcript() {
+        let mut transcript = Transcript::new("test");
+        transcript.append_u64("a", 1);
+        let a = transcript.challenge_scalar("a");
+        assert_eq!(
+            a.into_repr().to_bytes_be(),
+            hex!("0f9d11cec4f06b0d18060cde3db4196495ddfbb096108951446fc8a1d45f4b59"),
+        );
+
+        transcript.append_scalar("b", &Fr::from(2));
+        let b = transcript.challenge_scalar("b");
+        assert_eq!(
+            b.into_repr().to_bytes_be(),
+            hex!("0f4dccb919a5dba2dd010a562ba45b4551291f5e565706536e78b24ac8b5c64d"),
+        );
+
+        transcript.append_commitment(
+            "c",
+            &Commitment::<Bn254>(G1Affine::new(Fq::from(3), Fq::from(4), false)),
+        );
+        let c = transcript.challenge_scalar("c");
+        assert_eq!(
+            c.into_repr().to_bytes_be(),
+            hex!("1b5bf46adfcd1dd4f9ac7166586cf83f261192bc4b83fdda30ddee22f9054c1f"),
+        );
     }
 }

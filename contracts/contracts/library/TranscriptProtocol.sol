@@ -6,7 +6,6 @@ import "./Bn254.sol";
 library TranscriptProtocol {
     using Bn254 for Bn254.Fr;
 
-    // flip                    0xe000000000000000000000000000000000000000000000000000000000000000;
     uint256 constant private FR_MASK = 0x1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     uint8 constant private DST_0 = 0;
