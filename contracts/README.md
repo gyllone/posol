@@ -1,9 +1,13 @@
 # PoSol Verifying Contract
 
-Goerli: 0x6ce2C11f53f1199685770BbFd2cCba5245D36B1b
+## Config
 
 ```json
-[
+{
+  "url": "https://goerli.infura.io/v3/54d13b257eb94b2eab1c7875e0d8d301",
+  "sender": "0xfc5ca0a6e373966a3188c9abc191713614e65ded",
+  "contract": "0x6ce2C11f53f1199685770BbFd2cCba5245D36B1b",
+  "abi": [
     {
       "inputs": [
         {
@@ -274,17 +278,18 @@ Goerli: 0x6ce2C11f53f1199685770BbFd2cCba5245D36B1b
           "name": "balanceSum",
           "type": "tuple"
         }
-    ],
-    "name": "verifyBalanceSum",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      ],
+      "name": "verifyBalanceSum",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     }
-]
+  ]
+}
 ```

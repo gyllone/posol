@@ -64,9 +64,9 @@ library KZGChecker {
         Bn254.G1Point[] memory openings,
         Bn254.G1Point[] memory commitments
     ) internal view returns (bool) {
-        require(points.length == evals.length, "Unmatched array length");
-        require(points.length == openings.length, "Unmatched array length");
-        require(points.length == commitments.length, "Unmatched array length");
+        require(points.length == evals.length, "Array length mismatch");
+        require(points.length == openings.length, "Array length mismatch");
+        require(points.length == commitments.length, "Array length mismatch");
         
         Bn254.G1Point memory g = pointG();
         Bn254.G2Point memory h = pointH();

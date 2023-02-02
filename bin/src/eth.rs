@@ -2,6 +2,7 @@ use ark_ff::{PrimeField, BigInteger};
 use ark_poly::GeneralEvaluationDomain;
 use ark_bn254::{Fr, G1Affine, Bn254};
 use futures::executor::block_on;
+use itertools::Itertools;
 use web3::{
     ethabi, Transport,
     contract::{Options, Contract},
@@ -11,26 +12,70 @@ use posol_core::{balance_sum, commitment::KZG10};
 
 type Proof = balance_sum::Proof<Fr, GeneralEvaluationDomain<Fr>, KZG10<Bn254>>;
 
-pub fn submit_sum_proof<T: Transport>(
+pub enum Param {
+    Fr(Fr),
+    G1Affine(G1Affine),
+    Proof(Proof),
+}
+
+impl std::fmt::Display for Param {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Param::Fr(fr) => write!(f, "{}", fr),
+            Param::G1Affine(g1) => write!(f, "{}", g1),
+            Param::Proof(proof) => {
+                writeln!(f, "Proof {{")?;
+                writeln!(f, "  b: {}", &proof.evaluations.b)?;
+                writeln!(f, "  t: {}", &proof.evaluations.t)?;
+                writeln!(f, "  h1: {}", &proof.evaluations.h1)?;
+                writeln!(f, "  h2: {}", &proof.evaluations.h2)?;
+                writeln!(f, "  sNext: {}", &proof.evaluations.s_next)?;
+                writeln!(f, "  zNext: {}", &proof.evaluations.z_next)?;
+                writeln!(f, "  h1Next: {}", &proof.evaluations.h1_next)?;
+                writeln!(f, "  h2Next: {}", &proof.evaluations.h2_next)?;
+                writeln!(f, "  bCommit: {}", &proof.b_commit.0)?;
+                writeln!(f, "  sCommit: {}", &proof.s_commit.0)?;
+                writeln!(f, "  h1Commit: {}", &proof.h1_commit.0)?;
+                writeln!(f, "  h2Commit: {}", &proof.h2_commit.0)?;
+                writeln!(f, "  zCommit: {}", &proof.z_commit.0)?;
+                writeln!(f, "  q1Commit: {}", &proof.q1_commit.0)?;
+                writeln!(f, "  q2Commit: {}", &proof.q2_commit.0)?;
+                writeln!(f, "  opening1: {}", &proof.w_opening.w)?;
+                writeln!(f, "  opening2: {}", &proof.sw_opening.w)?;
+                write!(f, "}}")
+            }
+        }
+    }
+}
+
+impl<'a> Into<ethabi::Token> for &'a Param {
+    fn into(self) -> ethabi::Token {
+        match self {
+            Param::Fr(fr) => tokenize_fr(fr),
+            Param::G1Affine(g1) => tokenize_g1(g1),
+            Param::Proof(proof) => tokenize_sum_proof(proof),
+        }
+    }
+}
+
+pub fn call_contract<T: Transport>(
     from: Address,
     options: Options,
     contract: &Contract<T>,
-    proof: &Proof,
-    balance_sum: &Fr,
+    func_name: &str,
+    params: &[Param],
 ) -> H256 {
+    let params = params.iter().map(Into::into).collect_vec();
     let call = async {
         contract
-        .call(
-            "verifyBalanceSum",
-            (
-                tokenize_sum_proof(proof),
-                tokenize_fr(balance_sum),
-            ),
-            from,
-            options,
-        )
-        .await
-        .unwrap_or_else(|e| panic!("failed to submit proof: {:?}", e))
+            .call(
+                func_name,
+                &params[..],
+                from,
+                options,
+            )
+            .await
+            .unwrap_or_else(|e| panic!("failed to submit proof: {:?}", e))
     };
 
     block_on(call)

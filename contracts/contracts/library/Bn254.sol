@@ -223,7 +223,7 @@ library Bn254 {
     }
 
     function pairing(G1Point[] memory g1, G2Point[] memory g2) internal view returns (bool) {
-        require(g1.length == g2.length, "Unmatched array length");
+        require(g1.length == g2.length, "Array length mismatch");
         uint256 elements = g1.length;
         uint256 inputSize = elements * 6;
         uint256[] memory input = new uint256[](inputSize);

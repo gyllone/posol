@@ -214,6 +214,16 @@ fn main() {
                     rng,
                 ).expect("prove for balances sum failed");
 
+            let witness = Witness {
+                tag_commit: tag_commit.clone(),
+                labeled_tag_poly,
+                b_commit: proof.b_commit.clone(),
+                labeled_b_poly,
+            };
+            ser_to_file(&witness, &witness_path);
+
+            let proof = eth::Param::Proof(proof);
+            let m = eth::Param::Fr(m);
             if let Some(eth_path) = eth_path {
                 let eth_config: EthConfig = json_from_file(&eth_path);
                 let transport = Http::new(&eth_config.url).expect("failed to connect to eth network");
@@ -224,23 +234,18 @@ fn main() {
                 );
                 // submit `m` and `proof` on chain.
                 println!("submitting proof to eth network...");
-                let tx_hash = eth::submit_sum_proof(
+                let tx_hash = eth::call_contract(
                     eth_config.sender,
                     Default::default(),
                     &contract,
-                    &proof,
-                    &m,
+                    "verifyBalanceSum",
+                    &[proof, m],
                 );
                 println!("transaction hash: {:x}", tx_hash);
+            } else {
+                println!("{}", proof);
+                println!("{}", m);
             }
-
-            let witness = Witness {
-                tag_commit,
-                labeled_tag_poly,
-                b_commit: proof.b_commit,
-                labeled_b_poly,
-            };
-            ser_to_file(&witness, &witness_path);
         }
         Args::SupplyWitness {
             domain_size,
