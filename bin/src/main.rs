@@ -44,13 +44,13 @@ enum Args {
         #[arg(long = "cvk-path")]
         cvk_path: PathBuf,
     },
-    Precompute {
+    PrintParams {
         #[arg(long = "domain-size", default_value = "134217728")]
         domain_size: usize,
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
-        #[arg(long = "precomputed-path")]
-        precomputed_path: PathBuf,
+        #[arg(long = "cvk-path")]
+        cvk_path: PathBuf,
     },
     ProveAndCommit {
         #[arg(long = "domain-size", default_value = "134217728")]
@@ -59,8 +59,6 @@ enum Args {
         ck_path: PathBuf,
         #[arg(long = "users-path")]
         users_path: PathBuf,
-        #[arg(long = "precomputed-path")]
-        precomputed_path: PathBuf,
         #[arg(long = "witness-path")]
         witness_path: PathBuf,
         #[arg(long = "eth-path")]
@@ -117,11 +115,6 @@ fn main() {
             #[cfg(not(feature = "xs-rng"))]
             let rng = &mut rand::thread_rng();
 
-            let domain = GeneralEvaluationDomain::<Fr>::new(domain_size)
-                .expect("invalid domain size");
-            println!("domain group gen: {}", domain.group_gen());
-            println!("domain group gen inv: {}", domain.group_gen_inv());
-
             let max_degree = if cfg!(blinding) { domain_size + 3 } else { domain_size };
             let pp = KZG10::<Bn254>::setup(max_degree, None, rng)
                 .expect("invalid max degree");
@@ -132,47 +125,37 @@ fn main() {
                 None,
             ).unwrap();
 
-            println!("G: x: {}", &cvk.g.x);
-            println!("G: y: {}", &cvk.g.y);
-
-            println!("H: x-c0: {}", &cvk.h.x.c0);
-            println!("H: x-c1: {}", &cvk.h.x.c1);
-            println!("H: y-c0: {}", &cvk.h.y.c0);
-            println!("H: y-c1: {}", &cvk.h.y.c1);
-
-            println!("Beta H: x-c0: {}", &cvk.beta_h.x.c0);
-            println!("Beta H: x-c1: {}", &cvk.beta_h.x.c1);
-            println!("Beta H: y-c0: {}", &cvk.beta_h.y.c0);
-            println!("Beta H: y-c1: {}", &cvk.beta_h.y.c1);
-
             ser_to_file(&ck, &ck_path);
             ser_to_file(&cvk, &cvk_path);
         }
-        Args::Precompute {
+        Args::PrintParams {
             domain_size,
             ck_path,
-            precomputed_path,
+            cvk_path,
         } => {
             let ck: KZG10CommitterKey<Bn254> = deser_from_file(&ck_path);
+            let cvk: KZG10VerifierKey<Bn254> = deser_from_file(&cvk_path);
 
-            let (labeled_t_poly, t_commit) =
+            let domain = GeneralEvaluationDomain::<Fr>::new(domain_size)
+                .expect("invalid domain size");
+
+            let (_, t_commit) =
                 balance_sum::precompute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, domain_size)
                     .expect("precompute failed");
 
-            println!("t commit: x: {}", &t_commit.0.x);
-            println!("t commit: y: {}", &t_commit.0.y);
+            println!("domain group gen: {}", eth::Param::Fr(domain.group_gen()));
+            println!("domain group gen inv: {}", eth::Param::Fr(domain.group_gen_inv()));
 
-            let precomputed = Precomputed {
-                t_commit,
-                labeled_t_poly,
-            };
-            ser_to_file(&precomputed, &precomputed_path);
+            println!("G: {}", eth::Param::G1Affine(cvk.g));
+            println!("H: {}", eth::Param::G2Affine(cvk.h));
+            println!("Beta H: {}", eth::Param::G2Affine(cvk.beta_h));
+
+            println!("t commit: {}", eth::Param::G1Affine(t_commit.0));
         }
         Args::ProveAndCommit {
             domain_size,
             ck_path,
             users_path,
-            precomputed_path,
             witness_path,
             eth_path,
         } => {
@@ -190,7 +173,9 @@ fn main() {
                 .map(|ui| (&ui.tag[..], ui.balance))
                 .unzip();
 
-            let precomputed: Precomputed = deser_from_file(&precomputed_path);
+            let (labeled_t_poly, t_commit) =
+                balance_sum::precompute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, domain_size)
+                    .expect("precompute failed");
 
             // commit for tags first
             let (tag_commit, labeled_tag_poly) =
@@ -208,8 +193,8 @@ fn main() {
                 balance_sum::prove::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>, Transcript, _>(
                     &ck,
                     domain_size,
-                    &precomputed.labeled_t_poly,
-                    &precomputed.t_commit,
+                    &labeled_t_poly,
+                    &t_commit,
                     &balances,
                     rng,
                 ).expect("prove for balances sum failed");
@@ -288,12 +273,6 @@ fn main() {
 struct UserInfo {
     pub tag: [u8; 32],
     pub balance: u64,
-}
-
-#[derive(Debug, CanonicalSerialize, CanonicalDeserialize)]
-struct Precomputed {
-    pub t_commit: KZG10Commitment<Bn254>,
-    pub labeled_t_poly: LabeledPolynomial<Fr, DensePolynomial<Fr>>,
 }
 
 #[derive(Debug, CanonicalSerialize, CanonicalDeserialize)]

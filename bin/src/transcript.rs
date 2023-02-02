@@ -84,6 +84,9 @@ mod test {
         let mut transcript = Transcript::new("test");
         transcript.append_u64("a", 1);
         let a = transcript.challenge_scalar("a");
+
+        println!("{}", hex::encode(a.into_repr().to_bytes_le()));
+
         assert_eq!(
             a.into_repr().to_bytes_be(),
             hex!("0f9d11cec4f06b0d18060cde3db4196495ddfbb096108951446fc8a1d45f4b59"),
