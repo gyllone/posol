@@ -51,27 +51,32 @@ impl std::fmt::Display for Param {
             Param::G1Affine(g1) => fmt_g1_affine(f, g1),
             Param::G2Affine(g2) => fmt_g2_affine(f, g2),
             Param::Proof(proof) => {
+                macro_rules! with_fix {
+                    ($func:ident, $prefix:expr, $val:expr, $suffix:expr) => {
+                        write!(f, $prefix)?;
+                        $func(f, $val)?;
+                        write!(f, $suffix)?;
+                    };
+                }
                 write!(f, "{{\n")?;
-                write!(f, "\tb: {},\n", proof.evaluations.b)?;
-                write!(f, "\tt: {},\n", proof.evaluations.t)?;
-                write!(f, "\th1: {},\n", proof.evaluations.h1)?;
-                write!(f, "\th2: {},\n", proof.evaluations.h2)?;
-                write!(f, "\tsNext: {},\n", proof.evaluations.s_next)?;
-                write!(f, "\tzNext: {},\n", proof.evaluations.z_next)?;
-                write!(f, "\th1Next: {},\n", proof.evaluations.h1_next)?;
-                write!(f, "\th2Next: {},\n", proof.evaluations.h2_next)?;
-                write!(f, "\tbCommit: {},\n", proof.b_commit.0)?;
-                write!(f, "\tsCommit: {},\n", proof.s_commit.0)?;
-                write!(f, "\th1Commit: {},\n", proof.h1_commit.0)?;
-                write!(f, "\th2Commit: {},\n", proof.h2_commit.0)?;
-                write!(f, "\tzCommit: {},\n", proof.z_commit.0)?;
-                write!(f, "\tq1Commit: {},\n", proof.q1_commit.0)?;
-                write!(f, "\tq2Commit: {},\n", proof.q2_commit.0)?;
-                write!(f, "\topening1: {},\n", proof.w_opening.w)?;
-                write!(f, "\topening2: {}\n", proof.sw_opening.w)?;
-                write!(f, "}}")?;
-
-                Ok(())
+                with_fix!(fmt_fr, "\tb: ", &proof.evaluations.b, ",\n");
+                with_fix!(fmt_fr, "\tt: ", &proof.evaluations.t, ",\n");
+                with_fix!(fmt_fr, "\th1: ", &proof.evaluations.h1, ",\n");
+                with_fix!(fmt_fr, "\th2: ", &proof.evaluations.h2, ",\n");
+                with_fix!(fmt_fr, "\tsNext: ", &proof.evaluations.s_next, ",\n");
+                with_fix!(fmt_fr, "\tzNext: ", &proof.evaluations.z_next, ",\n");
+                with_fix!(fmt_fr, "\th1Next: ", &proof.evaluations.h1_next, ",\n");
+                with_fix!(fmt_fr, "\th2Next: ", &proof.evaluations.h2_next, ",\n");
+                with_fix!(fmt_g1_affine, "\tbCommit: ", &proof.b_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\tsCommit: ", &proof.s_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\th1Commit: ", &proof.h1_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\th2Commit: ", &proof.h2_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\tzCommit: ", &proof.z_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\tq1Commit: ", &proof.q1_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\tq2Commit: ", &proof.q2_commit.0, ",\n");
+                with_fix!(fmt_g1_affine, "\topening1: ", &proof.w_opening.w, ",\n");
+                with_fix!(fmt_g1_affine, "\topening2: ", &proof.sw_opening.w, "\n");
+                write!(f, "}}")
             }
         }
     }
