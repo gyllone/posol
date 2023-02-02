@@ -28,7 +28,7 @@ use parser::*;
 #[derive(Debug, Parser)]
 #[command(name = "Proof of Solvency", version = "0.0.1", about = "Proof of Solvency Simulator", long_about = "")]
 enum Args {
-    GenUsersData {
+    GenUsers {
         #[arg(long = "domain-size", default_value = "134217728")]
         domain_size: usize,
         #[arg(long = "users-size")]
@@ -44,7 +44,7 @@ enum Args {
         #[arg(long = "cvk-path")]
         cvk_path: PathBuf,
     },
-    Precomute {
+    Precompute {
         #[arg(long = "domain-size", default_value = "134217728")]
         domain_size: usize,
         #[arg(long = "ck-path")]
@@ -83,7 +83,7 @@ enum Args {
 fn main() {
     let args = Args::parse();
     match args {
-        Args::GenUsersData {
+        Args::GenUsers {
             domain_size,
             users_size,
             users_path,
@@ -148,7 +148,7 @@ fn main() {
             ser_to_file(&ck, &ck_path);
             ser_to_file(&cvk, &cvk_path);
         }
-        Args::Precomute {
+        Args::Precompute {
             domain_size,
             ck_path,
             precomputed_path,
@@ -156,8 +156,8 @@ fn main() {
             let ck: KZG10CommitterKey<Bn254> = deser_from_file(&ck_path);
 
             let (labeled_t_poly, t_commit) =
-                balance_sum::precomute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, domain_size)
-                    .expect("precomute failed");
+                balance_sum::precompute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, domain_size)
+                    .expect("precompute failed");
 
             println!("t commit: x: {}", &t_commit.0.x);
             println!("t commit: y: {}", &t_commit.0.y);

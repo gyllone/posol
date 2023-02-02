@@ -9,20 +9,20 @@ library KZGChecker {
 
     function pointG() internal pure returns (Bn254.G1Point memory) {
         return Bn254.G1Point(
-            0x1ae3ae77e4bae16dc07d0f43622cc8835143ed3957df5b9b3dec20d1b3a1c546,
-            0x2e8ff358e0d435b26342e24db5db2e1a1365de5bab56de591c1775c44edf73c1
+            0x29798bcb86bb7555185b140db83d0eba70144dcfe1c3e78266c6b4e6a9f2d860,
+            0x030e94f3b741705ef60d16d366788ebf6739da0e1d086f9f781c239dea42b019
         );
     }
 
     function pointH() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
-                0x2ee2102c718f1f9d8a59a1cae20c6253af391aafb53a3cfa73e6610a931a5302,
-                0x0f0936e100281a45b0768dfb1463cd67287443927e59fffc538be08caa06c459
+                0x0fd29b3a93d4fff876bb6ae4747c28fa5ebce32fc47f0eb0aceb8b3d229354fd,
+                0x29556e2e341ff77032548b0c2306352020e751f312af1722f0a88a8dd8805e62
             ],
             [
-                0x24a795d278f59445131295993962ee26056217efc1b3c1420dab196aacf686f0,
-                0x043673183bfd89ef388ee5eb48de3ced289ec31b96650ddc1f795ee8c9a84407
+                0x1487fc314c94733ed9c7015ddc38d25c9636869029b6b4386b9f808e9584f151,
+                0x175982e84d014441d058b20f790906cc4096a09e7ceaf4f9f9b9b8ce8229f924
             ]
         );
     }
@@ -30,12 +30,12 @@ library KZGChecker {
     function pointBetaH() internal pure returns (Bn254.G2Point memory) {
         return Bn254.G2Point(
             [
-                0x0205238886dab0bbd5326f37072d4e59033807777f1dd0ac69b6a576d4298df7,
-                0x250509b6fd346fb4986ceb3e3c2ae1352b91a2899c44a9bff7347f9309d5b2bb
+                0x0fc5f9115b7fa93f02bc063540979ef5811e1bdbb28097166007e4285ef485b2,
+                0x014900bf9af790006ba8b31a9e9f55097f7d57ab68a783718d1b309087a417ac
             ],
             [
-                0x28d625b881fd1da41d022112823ad7e55d43259bb37cd1bf7e08838fb5c35a7d,
-                0x0850c0444822f06b1f53da68c3ff950b1864b1982df33d23ea342ba16b713917
+                0x0b5249815f49d86953704b225156a08079ab1c7093984b815c01c156dd317e3e,
+                0x22d8a9196bd765bae4df8148dcb9401d68cc85da586f6db30abafdcfcd3adbcf
             ]
         );
     }

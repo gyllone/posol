@@ -23,7 +23,7 @@ use crate::{
     label_polynomial, label_commitment,
 };
 
-pub fn precomute<F, D, PC>(
+pub fn precompute<F, D, PC>(
     ck: &PC::CommitterKey,
     n: usize,
 ) -> Result<(LabeledPolynomial<F, DensePolynomial<F>>, PC::Commitment)>
@@ -620,7 +620,7 @@ mod test {
 
         // precompute
         let (labeled_t_poly, labeled_t_commit) =
-            precomute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n).unwrap();
+            precompute::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(&ck, n).unwrap();
 
         // generate random balances
         let balances = (0..n)

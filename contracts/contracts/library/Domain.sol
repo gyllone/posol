@@ -6,14 +6,14 @@ import "./Bn254.sol";
 library Domain {
     using Bn254 for Bn254.Fr;
 
-    uint64 constant public SIZE = 2 ** 27;
+    uint64 constant public SIZE = 2 ** 16;
 
     function domainGenerator() internal pure returns (Bn254.Fr memory) {
-        return Bn254.Fr(0x049ae702b363ebe85f256a9f6dc6e364b4823532f6437da2034afc4580928c44);
+        return Bn254.Fr(0x26125da10a0ed06327508aba06d1e303ac616632dbed349f53422da953337857);
     }
 
     function domainGeneratorInv() internal pure returns (Bn254.Fr memory) {
-        return Bn254.Fr(0x110BF78F435A46E97746A25A15D27CED4C787F72C9718F6CA8B64BA8980DB869);
+        return Bn254.Fr(0x100c332d2100895fab6473bc2c51bfca521f45cb3baca6260852a8fde26c91f3);
     }
 
     function element(uint256 index) internal view returns (Bn254.Fr memory) {
