@@ -14,29 +14,27 @@ use posol_core::{balance_sum, commitment::KZG10};
 type Proof = balance_sum::Proof<Fr, GeneralEvaluationDomain<Fr>, KZG10<Bn254>>;
 
 fn fmt_fr(f: &mut std::fmt::Formatter<'_>, fr: &Fr) -> std::fmt::Result {
-    write!(f, "{{\n")?;
-    write!(f, "  value: 0x{}\n", hex::encode(fr.into_repr().to_bytes_be()))?;
-    write!(f, "}}")
+    write!(f, "{{ value: 0x{} }}", hex::encode(fr.into_repr().to_bytes_be()))
 }
 
 fn fmt_g1_affine(f: &mut std::fmt::Formatter<'_>, g1: &G1Affine) -> std::fmt::Result {
-    write!(f, "{{\n")?;
-    write!(f, "  x: 0x{},\n", hex::encode(g1.x.into_repr().to_bytes_be()))?;
-    write!(f, "  y: 0x{}\n", hex::encode(g1.y.into_repr().to_bytes_be()))?;
-    write!(f, "}}")
+    write!(
+        f,
+        "{{ x: 0x{}, y: 0x{}}}",
+        hex::encode(g1.x.into_repr().to_bytes_be()),
+        hex::encode(g1.y.into_repr().to_bytes_be()),
+    )
 }
 
 fn fmt_g2_affine(f: &mut std::fmt::Formatter<'_>, g2: &G2Affine) -> std::fmt::Result {
-    write!(f, "{{\n")?;
-    write!(f, "  x: [\n")?;
-    write!(f, "    0x{},\n", hex::encode(g2.x.c1.into_repr().to_bytes_be()))?;
-    write!(f, "    0x{}\n", hex::encode(g2.x.c0.into_repr().to_bytes_be()))?;
-    write!(f, "  ],\n")?;
-    write!(f, "  y: [\n")?;
-    write!(f, "    0x{},\n", hex::encode(g2.y.c1.into_repr().to_bytes_be()))?;
-    write!(f, "    0x{}\n", hex::encode(g2.y.c0.into_repr().to_bytes_be()))?;
-    write!(f, "  ]\n")?;
-    write!(f, "}}")
+    write!(
+        f,
+        "{{ x: [0x{}, 0x{}], y: [0x{}, 0x{}] }}",
+        hex::encode(g2.x.c1.into_repr().to_bytes_be()),
+        hex::encode(g2.x.c0.into_repr().to_bytes_be()),
+        hex::encode(g2.y.c1.into_repr().to_bytes_be()),
+        hex::encode(g2.y.c0.into_repr().to_bytes_be()),
+    )
 }
 
 pub enum Param {
@@ -53,31 +51,27 @@ impl std::fmt::Display for Param {
             Param::G1Affine(g1) => fmt_g1_affine(f, g1),
             Param::G2Affine(g2) => fmt_g2_affine(f, g2),
             Param::Proof(proof) => {
-                macro_rules! with_prefix {
-                    ($func:ident, $prefix:expr, $val:expr) => {
-                        write!(f, $prefix)?;
-                        $func(f, $val)?;
-                    };
-                }
-                write!(f, "{{")?;
-                with_prefix!(fmt_fr, "\n  b: ", &proof.evaluations.b);
-                with_prefix!(fmt_fr, ",\n  t: ", &proof.evaluations.t);
-                with_prefix!(fmt_fr, ",\n  h1: ", &proof.evaluations.h1);
-                with_prefix!(fmt_fr, ",\n  h2: ", &proof.evaluations.h2);
-                with_prefix!(fmt_fr, ",\n  sNext: ", &proof.evaluations.s_next);
-                with_prefix!(fmt_fr, ",\n  zNext: ", &proof.evaluations.z_next);
-                with_prefix!(fmt_fr, ",\n  h1Next: ", &proof.evaluations.h1_next);
-                with_prefix!(fmt_fr, ",\n  h2Next: ", &proof.evaluations.h2_next);
-                with_prefix!(fmt_g1_affine, ",\n  bCommit: ", &proof.b_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  sCommit: ", &proof.s_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  h1Commit: ", &proof.h1_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  h2Commit: ", &proof.h2_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  zCommit: ", &proof.z_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  q1Commit: ", &proof.q1_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  q2Commit: ", &proof.q2_commit.0);
-                with_prefix!(fmt_g1_affine, ",\n  opening1: ", &proof.w_opening.w);
-                with_prefix!(fmt_g1_affine, ",\n  opening2: ", &proof.sw_opening.w);
-                write!(f, "\n}}")
+                write!(f, "{{\n")?;
+                write!(f, "\tb: {},\n", proof.evaluations.b)?;
+                write!(f, "\tt: {},\n", proof.evaluations.t)?;
+                write!(f, "\th1: {},\n", proof.evaluations.h1)?;
+                write!(f, "\th2: {},\n", proof.evaluations.h2)?;
+                write!(f, "\tsNext: {},\n", proof.evaluations.s_next)?;
+                write!(f, "\tzNext: {},\n", proof.evaluations.z_next)?;
+                write!(f, "\th1Next: {},\n", proof.evaluations.h1_next)?;
+                write!(f, "\th2Next: {},\n", proof.evaluations.h2_next)?;
+                write!(f, "\tbCommit: {},\n", proof.b_commit.0)?;
+                write!(f, "\tsCommit: {},\n", proof.s_commit.0)?;
+                write!(f, "\th1Commit: {},\n", proof.h1_commit.0)?;
+                write!(f, "\th2Commit: {},\n", proof.h2_commit.0)?;
+                write!(f, "\tzCommit: {},\n", proof.z_commit.0)?;
+                write!(f, "\tq1Commit: {},\n", proof.q1_commit.0)?;
+                write!(f, "\tq2Commit: {},\n", proof.q2_commit.0)?;
+                write!(f, "\topening1: {},\n", proof.w_opening.w)?;
+                write!(f, "\topening2: {}\n", proof.sw_opening.w)?;
+                write!(f, "}}")?;
+
+                Ok(())
             }
         }
     }
