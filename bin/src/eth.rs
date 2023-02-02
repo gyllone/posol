@@ -24,7 +24,7 @@ impl std::fmt::Display for Param {
             Param::Fr(fr) => write!(f, "{}", fr),
             Param::G1Affine(g1) => write!(f, "{}", g1),
             Param::Proof(proof) => {
-                writeln!(f, "Proof {{")?;
+                writeln!(f, "{{")?;
                 writeln!(f, "  b: {}", &proof.evaluations.b)?;
                 writeln!(f, "  t: {}", &proof.evaluations.t)?;
                 writeln!(f, "  h1: {}", &proof.evaluations.h1)?;

@@ -243,8 +243,8 @@ fn main() {
                 );
                 println!("transaction hash: {:x}", tx_hash);
             } else {
-                println!("{}", proof);
-                println!("{}", m);
+                println!("proof: {}", proof);
+                println!("balance sum: {}", m);
             }
         }
         Args::SupplyWitness {
