@@ -6,7 +6,7 @@ import "./Bn254.sol";
 library Domain {
     using Bn254 for Bn254.Fr;
 
-    uint64 constant public SIZE = 2 ** 16;
+    uint64 constant public SIZE = 2 ** 20;
 
     function domainGenerator() internal pure returns (Bn254.Fr memory) {
         return Bn254.Fr(0x26125da10a0ed06327508aba06d1e303ac616632dbed349f53422da953337857);
