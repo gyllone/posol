@@ -57,6 +57,8 @@ enum Args {
         domain_size: usize,
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
+        #[arg(long = "cvk-path")]
+        cvk_path: PathBuf,
         #[arg(long = "users-path")]
         users_path: PathBuf,
         #[arg(long = "witness-path")]
@@ -71,6 +73,8 @@ enum Args {
         user_index: usize,
         #[arg(long = "ck-path")]
         ck_path: PathBuf,
+        #[arg(long = "cvk-path")]
+        cvk_path: PathBuf,
         #[arg(long = "users-path")]
         users_path: PathBuf,
         #[arg(long = "witness-path")]
@@ -155,6 +159,7 @@ fn main() {
         Args::ProveAndCommit {
             domain_size,
             ck_path,
+            cvk_path,
             users_path,
             witness_path,
             eth_path,
@@ -165,7 +170,7 @@ fn main() {
             let rng = &mut rand::thread_rng();
 
             let ck: KZG10CommitterKey<Bn254> = deser_from_file(&ck_path);
-
+            let cvk: KZG10VerifierKey<Bn254> = deser_from_file(&cvk_path);
             let users_data: Vec<UserInfo> = json_from_file(&users_path);
             assert!(users_data.len() <= domain_size);
             let (tags, balances): (Vec<_>, Vec<_>) = users_data
@@ -198,6 +203,9 @@ fn main() {
                     &balances,
                     rng,
                 ).expect("prove for balances sum failed");
+
+            proof.verify::<Transcript>(&cvk, domain_size, &t_commit, m)
+                .expect("proof verification failed");
 
             let witness = Witness {
                 tag_commit: tag_commit.clone(),
@@ -236,15 +244,17 @@ fn main() {
             domain_size,
             user_index,
             ck_path,
+            cvk_path,
             users_path,
             witness_path,
         } => {
             let ck: KZG10CommitterKey<Bn254> = deser_from_file(&ck_path);
+            let cvk: KZG10VerifierKey<Bn254> = deser_from_file(&cvk_path);
             let witness: Witness = deser_from_file(&witness_path);
             let users_data: Vec<UserInfo> = json_from_file(&users_path);
             assert!(users_data.len() <= domain_size);
 
-            let _tag_opening = tag::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+            let tag_opening = tag::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
                 domain_size,
                 user_index,
@@ -252,10 +262,16 @@ fn main() {
                 &witness.tag_commit,
             ).expect("individual open for tag failed");
 
-            // println!("abi tag: {}", abi::tokenize_bytes32(&users_data[user_index].id));
-            // println!("abi tag opening: {}", abi::tokenize_g1(&tag_opening.w));
+            tag::individual_verify::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+                &cvk,
+                domain_size,
+                user_index,
+                &users_data[user_index].tag,
+                &witness.tag_commit,
+                &tag_opening,
+            ).expect("individual verify for tag failed");
 
-            let _b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+            let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
                 domain_size,
                 user_index,
@@ -263,8 +279,14 @@ fn main() {
                 &witness.b_commit,
             ).expect("individual open for balance failed");
 
-            // println!("abi balance: {}", users_data[user_index].balance);
-            // println!("abi balance opening: {}", abi::tokenize_g1(&b_opening.w));
+            balance_sum::individual_verify::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
+                &cvk,
+                domain_size,
+                user_index,
+                users_data[user_index].balance,
+                &witness.b_commit,
+                &b_opening,
+            ).expect("individual verify for balance failed");
         }
     }
 }
