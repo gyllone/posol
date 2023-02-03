@@ -256,14 +256,13 @@ library BalanceSumVerifier {
         Bn254.Fr memory one = Bn254.Fr(1);
         Bn254.Fr memory scalar = challenges.etas[1].sub(one);
         tmpPoint.copyFromG1(proof.bCommit);
-        tmpPoint.pointMul(scalar);
+        tmpPoint.pointMulAssign(scalar);
         commitment.pointAddAssign(tmpPoint);
 
         // scalar = (gamma + b) * (gamma + t) * delta + firstLag * delta^2
         Bn254.Fr memory tmp = challenges.gamma.add(proof.b);
-        scalar.copyFromFr(tmp);
-        tmp.copyFromFr(challenges.gamma);
-        tmp.addAssign(proof.t);
+        scalar.copyFromFr(challenges.gamma);
+        scalar.addAssign(proof.t);
         scalar.mulAssign(tmp);
         scalar.mulAssign(challenges.deltas[0]);
         tmp.copyFromFr(firstLagEval);
@@ -274,7 +273,7 @@ library BalanceSumVerifier {
         tmpPoint.pointMulAssign(scalar);
         commitment.pointAddAssign(tmpPoint);
 
-        // scalar = firstLag * delta^6 + eta^3
+        // scalar = eta^3 + firstLag * delta^6
         //          - (h1Next - h1 - 1) * (lastLag - 1) * delta^3
         //          - (h2Next - h1 - 1) * lastLag * delta^5
         Bn254.Fr memory h1PlusOne = proof.h1.add(one);
@@ -297,7 +296,7 @@ library BalanceSumVerifier {
         tmpPoint.pointMulAssign(scalar);
         commitment.pointAddAssign(tmpPoint);
 
-        // scalar = lastLag * delta^7 + eta^4
+        // scalar = eta^4 + lastLag * delta^7
         //          - zNext * (gamma + h1) * delta
         //          - (h2Next - h2 - 1) * (lastLag - 1) * delta^4
         scalar.copyFromFr(lastLagEval);
@@ -324,17 +323,17 @@ library BalanceSumVerifier {
         tmpPoint.pointMulAssign(zh);
         commitment.pointSubAssign(tmpPoint);
 
-        // scalar = -zh * (zh + 1)
+        // scalar = zh * (zh + 1)
         scalar.copyFromFr(zh);
         scalar.addAssign(one);
         scalar.mulAssign(zh);
         if (BLINDING) {
-            // scalar = -zh * (zh + 1) * z^3
+            // scalar = zh * (zh + 1) * z^3
             scalar.mulAssign(challenges.z);
             scalar.mulAssign(challenges.z);
             scalar.mulAssign(challenges.z);
         }
-        // scalar * [q2(X)]
+        // -scalar * [q2(X)]
         tmpPoint.copyFromG1(proof.q2Commit);
         tmpPoint.pointMulAssign(scalar);
         commitment.pointSubAssign(tmpPoint);
