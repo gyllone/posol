@@ -20,7 +20,7 @@ fn fmt_fr(f: &mut std::fmt::Formatter<'_>, fr: &Fr) -> std::fmt::Result {
 fn fmt_g1_affine(f: &mut std::fmt::Formatter<'_>, g1: &G1Affine) -> std::fmt::Result {
     write!(
         f,
-        "{{ x: 0x{}, y: 0x{}}}",
+        "{{ x: 0x{}, y: 0x{} }}",
         hex::encode(g1.x.into_repr().to_bytes_be()),
         hex::encode(g1.y.into_repr().to_bytes_be()),
     )
