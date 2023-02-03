@@ -118,15 +118,19 @@ library BalanceSumVerifier {
         // Expand deltas vector
         Bn254.Fr[7] memory deltas;
         deltas[0].copyFromFr(delta);
-        for (uint256 i = 1; i < 7; i++) {
-            deltas[i].copyFromFr(deltas[i - 1].mul(delta));
-        }
+        deltas[1].copyFromFr(deltas[0].mul(delta));
+        deltas[2].copyFromFr(deltas[1].mul(delta));
+        deltas[3].copyFromFr(deltas[2].mul(delta));
+        deltas[4].copyFromFr(deltas[3].mul(delta));
+        deltas[5].copyFromFr(deltas[4].mul(delta));
+        deltas[6].copyFromFr(deltas[5].mul(delta));
+
         // Expand etas vectors
         Bn254.Fr[4] memory etas;
         etas[0].copyFromFr(eta);
-        for (uint256 i = 1; i < 4; i++) {
-            etas[i].copyFromFr(etas[i - 1].mul(eta));
-        }
+        etas[1].copyFromFr(etas[0].mul(eta));
+        etas[2].copyFromFr(etas[1].mul(eta));
+        etas[3].copyFromFr(etas[2].mul(eta));
 
         return Challenges(gamma, z, lambda, deltas, etas);
     }
