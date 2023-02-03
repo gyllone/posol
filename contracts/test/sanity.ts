@@ -34,28 +34,28 @@ describe("Check Balance Sum Proof", function() {
   it("Should pass balance sum proof", async function() {
     const proof = {
       b: {
-        value: BigNumber.from("0x28319fc47334e5452b7460ff479f79282bc1474958a1625248e34af5a6da1764"),
+        value: BigNumber.from("0x26afcfb111d46dec5318cdee72b9609e8a4e03229073c21f5c8ba32f0c0ff78c"),
       },
       t: {
-        value: BigNumber.from("0x2902b082b9aa5203112b8d743f22718bc6921e5fd8cb68cd2335a8a28d18ec4e"),
+        value: BigNumber.from("0x157d7d540175dbaa6fceac623d1dba2ad75f33c455011d1b8cc80325ca37039a"),
       },
       h1: {
-        value: BigNumber.from("0x17acae83bd297d5e2e1697fd57bb30d35db7f41314e8af8fae679ede39672b66"),
+        value: BigNumber.from("0x114bb546f266bf8234df924899184878a9db4b31dff13c49ebd4d043294a6019"),
       },
       h2: {
-        value: BigNumber.from("0x17d054bffe2b63828c312b283cea8dc0fd9acb6faf7f061963dc3fb1aefe6cbb"),
+        value: BigNumber.from("0x1c751a67e2d3af796422b62ecfd0cbd3bb1cbf86c8e69ac7fa252d2b1c0c293a"),
       },
       sNext: {
-        value: BigNumber.from("0x11743a905a1963b413cf828d42c50d5d16d7c0a87f2b993b590e92734a198cd9"),
+        value: BigNumber.from("0x0ef5cdfcea63bb7000656c615182d52aeec020ef60f169417b6ce4e6101cfaec"),
       },
       zNext: {
-        value: BigNumber.from("0x2469e6293cc96a0f11260c3dd5dac7b0f52f6b3e9b756611f3b5dc6c59a3801f"),
+        value: BigNumber.from("0x2104accdba2f1744173451194cd32900cc2bc7ab19bf72e68d103cca1dceb14a"),
       },
       h1Next: {
-        value: BigNumber.from("0x2c5716b7ced3203f648805c1f9cee83b511100b49c0a9622b90bd3aaf7b7672e"),
+        value: BigNumber.from("0x1908f27d96e9a0bf3df83c8eee5a8cca212de5b4ce2f4c98eaa66b67dca7400a"),
       },
       h2Next: {
-        value: BigNumber.from("0x07b38a4128c2778acc83a6b3c9ab7a91b8806cd028f0d111c78b00923443b870"),
+        value: BigNumber.from("0x0167a667191dbf7ddca611f803ad2e227dffdcae6bf10d6f0bc4a0c72d06a350"),
       },
       bCommit: {
         x: BigNumber.from("0x1b7b21d8fc850ea38a47978120bff1e4c0a3c092c3e32a51b64401993e9645fc"),
@@ -74,24 +74,24 @@ describe("Check Balance Sum Proof", function() {
         y: BigNumber.from("0x2d96ee2710e7cfc1e0e7c9aef3e6aa89e3416d6a3c25ba06d8315c2a1cccfce2"),
       },
       zCommit: {
-        x: BigNumber.from("0x08fb8d334c7b87d467f5b07c466248a5ea5c3c025a386037b27f6c8bb59af531"),
-        y: BigNumber.from("0x13aef4dbbd54ad73db005731e169a49cfccc03a30718778b4692f62904d88a49"),
+        x: BigNumber.from("0x0b1042ec618b3a73a3766ddd1fb878a9a4b0551078a5f327015ec62dddd422a3"),
+        y: BigNumber.from("0x107e393c597a7afa93b9ae9f9757bd23ba6d5e0c1fdc6a13d74dbc14f4e7ef2a"),
       },
       q1Commit: {
-        x: BigNumber.from("0x21d581f38b6910b54cb499d0f1b5ff95858d2e015235affcd8f5f0eefaf1c437"),
-        y: BigNumber.from("0x02a8b0c4058ab5e0309db277106b4d091825388cf03608cf65f921fea8937d96"),
+        x: BigNumber.from("0x304a145f10b0abb609730bbba8e0ff47b6a5196387b70c81342892b8fd8a6bb4"),
+        y: BigNumber.from("0x2ca4e34e86da73e98edd3cd632d8c2da2c20832c48b104e43504a6b8d5eae645"),
       },
       q2Commit: {
-        x: BigNumber.from("0x2433f05f83ceb701c7b6d4152fd3c59f6470020f7f39183aca40b6b276eeadf4"),
-        y: BigNumber.from("0x0c0cc540a47b5d227fefe7dc8d5edb4104f716a41393d8df04a3438d5af2bc0a"),
+        x: BigNumber.from("0x06f6c9712f49beec55695438de95365d59c87cfd8e332e538f02de8525a81d5c"),
+        y: BigNumber.from("0x194062ba25d1bdee57d3be95b5726f8d6a61a14f9db26f53bbe4be7718f9e243"),
       },
       opening1: {
-        x: BigNumber.from("0x0519a1b094706c33f7a7f4dc60e1643025e1adfb66d1ad61035a632180875392"),
-        y: BigNumber.from("0x1092e5cffd177431128bd5ae17fd99a11e8279dd4ae46cb0e294082d38be7984"),
+        x: BigNumber.from("0x0eec4d23b86e54443e0bc7300d8a9f5d339236e3eeb057c311a8fa478b52f34f"),
+        y: BigNumber.from("0x2f3892c9be613a59067a9ce7ca743f475238491e983f192373baf08ea7f2740c"),
       },
       opening2: {
-        x: BigNumber.from("0x03aebcac21653cd9a67be0a4cf89e34d6bd280f092e6086eb115f685c65744ae"),
-        y: BigNumber.from("0x2ca6fd563bd039d8d412dd884cda9d9f3e226847b7374774a0e40edf501bcae6"),
+        x: BigNumber.from("0x1b2dbe8742e75fe3d9127c6c5768083dee83f36aab49275da9eb10af69b3c5a6"),
+        y: BigNumber.from("0x1c8a98e14aa457ead304309b7661f638d27d25ad2d888641842fb10181cdf659"),
       },
     };
     const m = {

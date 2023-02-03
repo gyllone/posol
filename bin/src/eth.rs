@@ -14,7 +14,7 @@ use posol_core::{balance_sum, commitment::KZG10};
 type Proof = balance_sum::Proof<Fr, GeneralEvaluationDomain<Fr>, KZG10<Bn254>>;
 
 fn fmt_fr(f: &mut std::fmt::Formatter<'_>, fr: &Fr) -> std::fmt::Result {
-    write!(f, "{{ value: 0x{} }}", hex::encode(fr.into_repr().to_bytes_be()))
+    write!(f, "0x{}", hex::encode(fr.into_repr().to_bytes_be()))
 }
 
 fn fmt_g1_affine(f: &mut std::fmt::Formatter<'_>, g1: &G1Affine) -> std::fmt::Result {
