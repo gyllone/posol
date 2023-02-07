@@ -190,8 +190,6 @@ fn main() {
                     &tags,
                 )
                 .expect("commit to tags failed");
-
-            // println!("abi tag commit: {}", abi::tokenize_g1(&tag_commit.0));
                     
             // prove and commit for balances sum
             let (m, proof, labeled_b_poly) =
@@ -215,6 +213,7 @@ fn main() {
             };
             ser_to_file(&witness, &witness_path);
 
+            let tag_commit = eth::Param::G1Affine(tag_commit.0);
             let proof = eth::Param::Proof(proof);
             let m = eth::Param::Fr(m);
             if let Some(eth_path) = eth_path {
@@ -236,6 +235,7 @@ fn main() {
                 );
                 println!("transaction hash: {:x}", tx_hash);
             } else {
+                println!("tag commitment: {}", tag_commit);
                 println!("proof: {}", proof);
                 println!("balance sum: {}", m);
             }
@@ -271,6 +271,9 @@ fn main() {
                 &tag_opening,
             ).expect("individual verify for tag failed");
 
+            let tag_opening = eth::Param::G1Affine(tag_opening.w);
+            println!("tag opening: {}", tag_opening);
+
             let b_opening = balance_sum::individual_open::<_, GeneralEvaluationDomain<_>, KZG10<Bn254>>(
                 &ck,
                 domain_size,
@@ -287,6 +290,9 @@ fn main() {
                 &witness.b_commit,
                 &b_opening,
             ).expect("individual verify for balance failed");
+
+            let b_opening = eth::Param::G1Affine(b_opening.w);
+            println!("balance opening: {}", b_opening);
         }
     }
 }
