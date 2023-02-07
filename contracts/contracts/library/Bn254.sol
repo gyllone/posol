@@ -21,8 +21,8 @@ library Bn254 {
         uint256[2] y;
     }
 
-    function validateFr(Fr memory self) internal pure {
-        require(self.value < R_MOD, "Fr is invalid");
+    function isFrValid(Fr memory self) internal pure returns (bool) {
+        return self.value < R_MOD;
     }
 
     function cloneFr(Fr memory self) internal pure returns (Fr memory) {
@@ -81,22 +81,38 @@ library Bn254 {
         require(success, "Fr pow operation failed");
     }
 
-    function validateG1(G1Point memory self) internal pure {
+    function isG1Valid(G1Point memory self) internal pure returns (bool) {
         if (self.x == 0 && self.y == 0) {
-            return;
+            return true;
         }
-
         // check encoding
-        require(self.x < Q_MOD, "X axis isn't valid");
-        require(self.y < Q_MOD, "Y axis isn't valid");
+        if (self.x >= Q_MOD || self.y >= Q_MOD) {
+            return false;
+        }
         // check on curve
         uint256 lhs = mulmod(self.y, self.y, Q_MOD); // y^2
-
         uint256 rhs = mulmod(self.x, self.x, Q_MOD); // x^2
         rhs = mulmod(rhs, self.x, Q_MOD); // x^3
         rhs = addmod(rhs, BN254_B_COEFF, Q_MOD); // x^3 + b
-        require(lhs == rhs, "G1 point is not on curve");
+        return lhs == rhs;
     }
+
+    // function validateG1(G1Point memory self) internal pure {
+    //     if (self.x == 0 && self.y == 0) {
+    //         return;
+    //     }
+
+    //     // check encoding
+    //     require(self.x < Q_MOD, "X axis isn't valid");
+    //     require(self.y < Q_MOD, "Y axis isn't valid");
+    //     // check on curve
+    //     uint256 lhs = mulmod(self.y, self.y, Q_MOD); // y^2
+
+    //     uint256 rhs = mulmod(self.x, self.x, Q_MOD); // x^2
+    //     rhs = mulmod(rhs, self.x, Q_MOD); // x^3
+    //     rhs = addmod(rhs, BN254_B_COEFF, Q_MOD); // x^3 + b
+    //     require(lhs == rhs, "G1 point is not on curve");
+    // }
 
     function copyFromG1(G1Point memory self, G1Point memory other) internal pure {
         self.x = other.x;

@@ -54,24 +54,24 @@ library BalanceSumVerifier {
     }
 
     function validateProof(Proof memory proof) internal pure {
-        proof.b.validateFr();
-        proof.t.validateFr();
-        proof.h1.validateFr();
-        proof.h2.validateFr();
-        proof.sNext.validateFr();
-        proof.zNext.validateFr();
-        proof.h1Next.validateFr();
-        proof.h2Next.validateFr();
-
-        proof.bCommit.validateG1();
-        proof.sCommit.validateG1();
-        proof.h1Commit.validateG1();
-        proof.h2Commit.validateG1();
-        proof.zCommit.validateG1();
-        proof.q1Commit.validateG1();
-        proof.q2Commit.validateG1();
-        proof.opening1.validateG1();
-        proof.opening2.validateG1();
+        require(proof.b.isFrValid(), "evaluation b is invalid");
+        require(proof.t.isFrValid(), "evaluation t is invalid");
+        require(proof.h1.isFrValid(), "evaluation h1 is invalid");
+        require(proof.h2.isFrValid(), "evaluation h2 is invalid");
+        require(proof.sNext.isFrValid(), "evaluation sNext is invalid");
+        require(proof.zNext.isFrValid(), "evaluation zNext is invalid");
+        require(proof.h1Next.isFrValid(), "evaluation h1Next is invalid");
+        require(proof.h2Next.isFrValid(), "evaluation h2Next is invalid");
+        
+        require(proof.bCommit.isG1Valid(), "Commitment b is invalid");
+        require(proof.sCommit.isG1Valid(), "Commitment s is invalid");
+        require(proof.h1Commit.isG1Valid(), "Commitment h1 is invalid");
+        require(proof.h2Commit.isG1Valid(), "Commitment h2 is invalid");
+        require(proof.zCommit.isG1Valid(), "Commitment z is invalid");
+        require(proof.q1Commit.isG1Valid(), "Commitment q1 is invalid");
+        require(proof.q2Commit.isG1Valid(), "Commitment q2 is invalid");
+        require(proof.opening1.isG1Valid(), "Opening 1 is invalid");
+        require(proof.opening2.isG1Valid(), "Opening 2 is invalid");
     }
     
     function generateChallenges(
@@ -386,7 +386,7 @@ library BalanceSumVerifier {
     }
 
     function verify(Proof memory proof, Bn254.Fr memory m) internal view returns (bool) {
-        m.validateFr();
+        require(m.isFrValid(), "balance sum is invalid");
         validateProof(proof);
 
         // Generate challenges via Fiat-Shamir algorithm
@@ -415,7 +415,7 @@ library BalanceSumVerifier {
             firstLagEval,
             lastLagEval
         );
-        
+
         // Compute evaluation 2
         Bn254.Fr memory evaluation2 = computeEvaluation2(proof, challenges);
         // Compute commitment 2

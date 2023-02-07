@@ -13,6 +13,8 @@ contract TestBalanceSumVerifier {
     using TranscriptProtocol for TranscriptProtocol.Transcript;
     using BalanceSumVerifier for BalanceSumVerifier.Proof;
     
+    event ProofVerified(bool);
+
     function testLastChallenge(
         BalanceSumVerifier.Proof memory proof,
         Bn254.Fr memory m
@@ -58,5 +60,13 @@ contract TestBalanceSumVerifier {
             lastLagEval
         );
         return (commitment1.x, commitment1.y);
+    }
+
+    function testVerifyProof(
+        BalanceSumVerifier.Proof memory proof,
+        Bn254.Fr memory balanceSum
+    ) public {
+        bool result = proof.verify(balanceSum);
+        emit ProofVerified(result);
     }
 }
