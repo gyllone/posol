@@ -12,8 +12,20 @@ contract TestBalanceSumVerifier {
     using Bn254 for Bn254.G1Point;
     using TranscriptProtocol for TranscriptProtocol.Transcript;
     using BalanceSumVerifier for BalanceSumVerifier.Proof;
-    
-    event ProofVerified(bool);
+
+    struct PackedProof {
+        BalanceSumVerifier.Proof proof;
+        Bn254.Fr balanceSum;
+    }
+
+    struct CommittedData {
+        uint256 timestamp;
+        Bn254.G1Point tagCommit;
+        Bn254.G1Point aggBalanceCommit;
+        Bn254.Fr aggBalanceSum;
+    }
+
+    mapping(bytes32 => CommittedData[]) private committedDatas;
 
     function testLastChallenge(
         BalanceSumVerifier.Proof memory proof,
@@ -67,6 +79,29 @@ contract TestBalanceSumVerifier {
         Bn254.Fr memory balanceSum
     ) public {
         bool result = proof.verify(balanceSum);
-        emit ProofVerified(result);
+        require(result, "failed to verify proof");
+    }
+
+    function testForCexProver(
+        PackedProof[] memory proofs
+    ) public {
+        Bn254.G1Point memory aggBalanceCommit = Bn254.G1Point(0, 0);
+        Bn254.Fr memory aggBalanceSum = Bn254.Fr(0);
+        Bn254.Fr memory multiplier = Bn254.Fr(1);
+        for (uint i = 0; i < proofs.length; i++) {
+            PackedProof memory proof = proofs[i];
+            // verify each balance sum proof
+            bool result = proof.proof.verify(proof.balanceSum);
+            require(result, "Failed verify balance sum proof");
+
+            // aggregate balance sum
+            proof.balanceSum.mulAssign(multiplier);
+            aggBalanceSum.addAssign(proof.balanceSum);
+            // aggregate balance commitment
+            proof.proof.bCommit.pointMulAssign(multiplier);
+            aggBalanceCommit.pointAddAssign(proof.proof.bCommit);
+            // update multiplier
+            multiplier.mulAssign(Bn254.Fr(Domain.SIZE));
+        }
     }
 }
