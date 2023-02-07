@@ -48,8 +48,8 @@ library BalanceSumVerifier {
     // Need to match with params in KZGChecker.sol.
     function tCommit() internal pure returns (Bn254.G1Point memory) {
         return Bn254.G1Point(
-            0x2a7ab5e94003990868d511f82bb0694acf4707ce8903ec4bd3bbfb6c8aac4c97,
-            0x2ca74e4731e34ee7ad3ba6d81b2542b8c69984e8fd95c9f828ce729f39421049
+            0x134ad6e40b1fd6fa9433dbdec8e8fef896d60a1bc316800f4d69ef013b5020c6,
+            0x1c44b84d012653e486be069f32f148c6b06e7215af7076ca857a6d8d905be060
         );
     }
 
