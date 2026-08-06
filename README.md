@@ -128,3 +128,7 @@ yarn hardhat test
 This repository is an unaudited proof of concept. The protocol and its Rust and Solidity implementations require independent cryptographic and security audits before production use.
 
 The implemented proof establishes properties of the exchange's committed user-liability dataset: the declared balance sum, balance range constraints, and individual inclusion. It does **not**, by itself, prove ownership or control of reserve assets, the completeness of the exchange's account snapshot, or a sufficient reserve-to-liability ratio. A complete proof-of-solvency system must combine this liability proof with independently verifiable reserve attestations and a trustworthy snapshot process.
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
